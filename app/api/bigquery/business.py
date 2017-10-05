@@ -16,6 +16,9 @@ def list_files(request_id):
     query_job_id = gi.get_job(gi.get_query_job_id(data['request_id']))
     query_job = gi.get_job(query_job_id)
     result = {'request_id':request_id}
+    if query_job is None:
+        result['status'] = 'error'
+        result['message'] = 'No such request'
     if query_job.state != 'DONE':
         result['status'] = 'running'
         return result
@@ -26,11 +29,38 @@ def list_files(request_id):
     if extract_job.state != 'DONE':
         result['status'] = 'running'
         return result
-
-    result['request_uri'] = gi.get_urls( request_id ) 
-    result['status'] = 'complete'
+    else:
+        result['request_uri'] = gi.get_urls( request_id ) 
+        result['status'] = 'complete'
     return result
 
+def get_request_status(request_id):
+    gi = GoogleInterface()
+    query_job_id = gi.get_job(gi.get_query_job_id(request_id))
+    query_job = gi.get_job(query_job_id)
+    result = {'request_id':request_id}
+    if query_job is None:
+        result['status'] = 'error'
+        result['message'] = 'No such request'
+    elif query_job.state != 'DONE':
+        result['status'] = 'running'
+        return result
+    else:
+        extract_job_id = gi.get_job(gi.get_extract_job_id(request_id))
+        extract_job = gi.get_job(extract_job_id)
+        
+        if extract_job.state != 'DONE':
+            result['status'] = 'running'
+            return result
+        else:
+            result['request_uri'] = gi.get_urls( request_id ) 
+            result['status'] = 'complete'
+    return result
+
+def run_query(query):
+    gi = GoogleInterface()
+    request_id = gi.query(query)
+    return request_id
 
 
 glogger = logging.getLogger('GoogleInterface')
@@ -99,6 +129,7 @@ class GoogleInterface:
         for j in self.bq_client.list_jobs():
             if j.name == job_id:
                 return j
+        return None
 
     def get_urls(self, job_id):
         job = self.get_job(job_id)

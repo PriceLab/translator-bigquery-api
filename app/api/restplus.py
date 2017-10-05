@@ -7,7 +7,7 @@ from sqlalchemy.orm.exc import NoResultFound
 
 log = logging.getLogger(__name__)
 
-log.info("In restplus")
+log.debug("In restplus")
 api = Api(version='1.0', title='Blue Team Bigquery Demo',
           description='API for accessing bigquery similarity scores')
 

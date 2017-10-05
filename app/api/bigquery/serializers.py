@@ -18,6 +18,14 @@ query_response = api.model('Query request response', {
             description='The request id for this query as UUID'),
     })
 
+request_get = api.model('The status of a query request', {
+    'request_id' :  fields.String(readOnly=True, 
+            description='The request id for this query as UUID',
+            pattern='[0-9a-f]{12}4[0-9a-f]{3}[89ab][0-9a-f]{15}\Z',
+            required=True
+            ),
+    })
+
 request_status = api.model('The status of a query request', {
     'request_id' :  fields.String(readOnly=True, 
             description='The request id for this query as UUID',

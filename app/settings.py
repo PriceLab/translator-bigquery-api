@@ -15,4 +15,4 @@ SQLALCHEMY_TRACK_MODIFICATIONS = False
 #Bigquery settings
 
 BIGQUERY_KEY = '/cred/miRNA project-01ca75e6de66.json'
-BIGQUERY_BUCKET = 'ncats_bigquery_resultsy
+BIGQUERY_BUCKET = 'ncats_bigquery_results'
