@@ -26,9 +26,9 @@ class Similarity(Resource):
 
 
 
+@ns.doc(params={'request_id': 'The request id for a query'})
 @ns.route('/status/<string:request_id>')
 class SimilarityStatus(Resource):
-
     @ns.response(404, "Request Id not found.")
     @ns.response(200, "OK")
     def get(self, request_id):
