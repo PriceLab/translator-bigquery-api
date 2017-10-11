@@ -1,4 +1,5 @@
 # Flask settings
+
 FLASK_SERVER_NAME = 'isbtranslatorapi.adversary.us:8080'
 FLASK_DEBUG = False  # Do not use debug mode in production
 
@@ -16,7 +17,7 @@ SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 BIGQUERY_KEY = '/cred/miRNA project-01ca75e6de66.json'
 BIGQUERY_BUCKET = 'ncats_bigquery_results'
-BIGQUERY_PROJECT = 'isb-cgc-04-0010:NTTB_MERGE'
+BIGQUERY_PROJECT = 'isb-cgc-04-0010'
+BIGQUERY_DATASET = 'NTTB_MERGE'
 BIGQUERY_DEFAULT_TABLE = 'FA_90_v0'
-
 
