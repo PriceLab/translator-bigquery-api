@@ -7,6 +7,7 @@ sys.path.append('/')
 from flask import Flask, Blueprint
 from app import settings
 from app.api.bigquery.endpoints.similarity import ns as similarity
+from app.api.bigquery.endpoints.metadata import ns as metadata
 from app.api.restplus import api
 from app.database import db
 
@@ -16,7 +17,7 @@ from app.database import db
 
 app = Flask(__name__)
 logging.config.fileConfig('logging.conf')
-log = logging.getLogger()#__name__)
+log = logging.getLogger(__name__)
 
 
 def configure_app(flask_app):
@@ -37,6 +38,7 @@ def initialize_app(app):
     blueprint = Blueprint('api', __name__, url_prefix='/api')
     api.init_app(blueprint)
     api.add_namespace(similarity)
+    api.add_namespace(metadata)
     app.register_blueprint(blueprint)
 
     db.init_app(app)

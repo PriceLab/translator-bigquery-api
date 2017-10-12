@@ -132,13 +132,14 @@ class GoogleInterface:
 
     def get_urls(self, request_id):
         job = self.get_extract_job(request_id)
-        
         if job is None:
             glogger.debug("No job for %s" % (request_id, ))
             raise Exception("No such job.")
         if job.state == u'DONE' and job.errors is None:
+            output_files = self.list_blobs(prefix=request_id)
+            map(lambda x: x.make_public(), output_files)
             glogger.debug("Getting urls for extract job %s" % job.name)
-            return map(lambda x: x.public_url, self.list_blobs(prefix=request_id))
+            return map(lambda x: x.public_url, output_files)
         elif job.errors is not None:
             glogger.warning("Error on extract job")
         else:
@@ -229,18 +230,23 @@ class QueryBuilder:
         FROM = "FROM [%s:%s.%s]" % (self._project, self._dataset, self._table)
         WHERE = []
         for column, value in self._restriction_gt:
+
             if column.find('Pvalue') > -1:
-                value = -1*np.log(float(value))
+                # pvalues are stored as neg log
+                value = -1*np.log10(float(value))
+                line = " %s < %.5f " % (column, value)
             else:
                 value = float(value)
+                line = " %s > %.5f " % (column, value)
             line = " %s > %.5f " % (column, float(value))
             WHERE.append(line)
         for column, value in self._restriction_lt:
             if column.find('Pvalue') > -1:
-                value = -1*np.log(float(value))
+                value = -1*np.log10(float(value))
+                line = " %s > %.5f " % (column, value)
             else:
                 value = float(value)
-            line = " %s < %.5f " % (column, value)
+                line = " %s < %.5f " % (column, value)
             WHERE.append(line)
         if len(self._genes_to):
             gf = ','.join(self._genes_from)
@@ -291,7 +297,7 @@ class QueryBuilder:
 
 
         error_messages = []
-        rj = request.json
+        rj = request
         args = {}
         if 'ids1' in rj:
             args['genes_from'] = parse_list(rj['ids1'])

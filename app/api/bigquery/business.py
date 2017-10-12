@@ -6,6 +6,7 @@ from app.api.bigquery.querytools import *
 from google.cloud import bigquery
 from google.cloud import storage
 import uuid, logging
+import math
 
 glogger = logging.getLogger()
 KEY = settings.BIGQUERY_KEY
@@ -18,8 +19,20 @@ def test_business(data):
 def list_files(request_id):
     pass
 
+def list_tables(project, dataset):
+    pass
+    
 
 def get_request_status(request_id):
+
+    def convert_size(size_bytes):
+        if size_bytes == 0:
+            return "0B"
+        size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
+        i = int(math.floor(math.log(size_bytes, 1024)))
+        p = math.pow(1024, i)
+        s = round(size_bytes / p, 2)
+        return "%s %s" % (s, size_name[i])
     gi = GoogleInterface()
     query_job_id = gi.get_query_job_id(request_id)
     glogger.debug("Searching for %s query job" % (query_job_id,))
@@ -44,7 +57,13 @@ def get_request_status(request_id):
         elif extract_job.state != 'DONE':
             result['status'] = 'running'
         else:
-            tbl = query_job.destination
+            qr = query_job.query_results()
+            result['rows'] = qr.total_rows
+            result['processed_data'] = convert_size(qr.total_bytes_processed)
+            total_file_size = 0
+            for b in gi.list_blobs(prefix=request_id):
+                total_file_size += b.size
+            result['size'] = convert_size(total_file_size)
             #glogger.debug("rows: %s" % (tbl.reload().num_rows,))
             result['request_uri'] = gi.get_urls( request_id ) 
             result['status'] = 'complete'
