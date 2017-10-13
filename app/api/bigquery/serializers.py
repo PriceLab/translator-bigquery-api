@@ -96,3 +96,10 @@ query_response = api.model('The query response.', {
 
         'message': fields.String(description="""Error messages if status is __error__""")
     })
+
+table_response = api.model('Table', {
+    'name' :fields.String(description="Table name"),
+    'description' :fields.String(description="Table description"),
+    'num_rows' :fields.Integer(description="Number of rows in table"),
+    'num_bytes': fields.Integer(description="Number of bytes in table")
+    })
