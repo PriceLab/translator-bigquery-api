@@ -14,7 +14,7 @@ from app import settings
 log = logging.getLogger(__name__)
 
 ns = api.namespace('similarity', 
-        description="""Access the similarity profiles of various
+        description="""Mine the interaction profiles of various
         entities
         """)
 

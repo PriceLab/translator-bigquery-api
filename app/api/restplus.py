@@ -8,7 +8,7 @@ from sqlalchemy.orm.exc import NoResultFound
 log = logging.getLogger(__name__)
 
 log.debug("In restplus")
-api = Api(version='1.0', title='Blue Team Bigquery Demo',
+api = Api(version='1.0', title='Big GIM(Gene Interaction Miner)',
           description='API for accessing bigquery similarity scores')
 
 
@@ -25,4 +25,3 @@ def default_error_handler(e):
 def database_not_found_error_handler(e):
     log.warning(traceback.format_exc())
     return {'message': 'A database result was required but none was found.'}, 404
-

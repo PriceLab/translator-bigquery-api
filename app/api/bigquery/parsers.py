@@ -51,6 +51,20 @@ A list of pairs of values `column name,value` with which to restrict the results
 
 **Example**: TCGA_GBM_Correlation,.2, GTEx_Brain_Correlation,.2
 """)
+query_url_parser.add_argument( 'restriction_bool', help="""
+A list of pairs of values `column name,value` with which to restrict the results of the query to rows where the value of the column is True or False.
+
+**Default**: No restrictions
+
+**Example**: BioGRID_Interaction,True
+""")
+query_url_parser.add_argument( 'restriction_join', help="""
+The type of join made on restrictions. Either `intersect` or `union`
+
+**Default**: intersect
+
+**Example**: intersect
+""")
 query_url_parser.add_argument('table', help="""
 The table to select from.
 

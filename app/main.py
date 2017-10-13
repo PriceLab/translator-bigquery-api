@@ -40,7 +40,6 @@ def initialize_app(app):
     api.add_namespace(similarity)
     api.add_namespace(metadata)
     app.register_blueprint(blueprint)
-
     db.init_app(app)
     log.info("finished initialize")
 

@@ -7,7 +7,7 @@ from app.api.bigquery.serializers import query_request, query_status_response, q
 from app.api.bigquery.parsers import query_url_parser
 
 from app.api.restplus import api
-from app.database.models import TestModel 
+from app.database.helpers import populate_database
 from app import settings
 
 log = logging.getLogger(__name__)
@@ -33,3 +33,8 @@ class MetadataTableResources(Resource):
         """Retrieve list of available tables"""
         return ['All tables'], 200
 
+
+@ns.route('/init_db')
+class Initdb(Resource):
+    def get(self):
+        populate_database()

@@ -24,7 +24,7 @@ def extract_callback(extract_job):
         """Need to make the files public for download."""
         gi = GoogleInterface()
         output_files = gi.list_blobs(prefix=gi.get_job_id(extract_job.name))
-        glogger.debug("%s generated %s" % (extract_job.name, 
+        glogger.debug("%s generated %s" % (extract_job.name,
                                            ','.join(map(lambda x: x.name, output_files))))
         if len(output_files) > 0:
             map(lambda x: x.make_public(), output_files)
@@ -34,7 +34,7 @@ def extract_callback(extract_job):
             glogger.exception("No files generated error extracting %s" % (extract_job.name))
 
     def rerun_extract(extract_job):
-        """Not found error means retry extraction"""        
+        """Not found error means retry extraction"""
         gi = GoogleInterface()
         glogger.warning("Not found error while extracting %s", (extract_job.name))
         ejs = extract_job.name.split('-')
@@ -96,7 +96,7 @@ class GoogleInterface:
         glogger.debug("%s" % (destination_table,))
         self.extract_job(request_id, destination_table)
         return request_id
-    
+
     def extract_job(self, request_id, destination_table, trial=0):
         extract_job = self.bq_client.extract_table_to_storage(
             self.get_extract_job_id(request_id, trial=trial), destination_table,
@@ -104,7 +104,7 @@ class GoogleInterface:
         extract_job.destination_format = 'CSV'
         extract_job.begin()
         extract_job.add_done_callback(extract_callback)
-        
+
 
     def list_blobs(self, bucket_name=BUCKET, prefix=''):
         glogger.debug("List blobs")
@@ -118,12 +118,12 @@ class GoogleInterface:
         ej = [j for j in self.bq_client.list_jobs() if j.name.find(request_id) > -1 and j.name.find('ej') > -1]
         jobs = sorted(ej, key=lambda x: x.name)
         return jobs[-1]
-    
+
     def get_query_job(self, request_id):
         ej = [j for j in self.bq_client.list_jobs() if j.name.find(request_id) > -1 and j.name.find('bq') > -1]
         jobs = sorted(ej, key=lambda x: x.name)
         return jobs[-1]
-    
+
     def get_job(self, job_id):
         for j in self.bq_client.list_jobs():
             if j.name == job_id:
@@ -148,12 +148,14 @@ class GoogleInterface:
 
 class QueryBuilder:
     """Generates and validates a provided query"""
-    def __init__(self, table=settings.BIGQUERY_DEFAULT_TABLE, 
-            columns=[], 
-            genes_from=[], 
+    def __init__(self, table=settings.BIGQUERY_DEFAULT_TABLE,
+            columns=[],
+            genes_from=[],
             genes_to=[],
-            restriction_gt=[], 
+            restriction_gt=[],
             restriction_lt=[],
+            restriction_bool=[],
+            restriction_join='intersect',
             error_messages=[]):
         self._project = settings.BIGQUERY_PROJECT
         self._dataset = settings.BIGQUERY_DATASET
@@ -163,6 +165,8 @@ class QueryBuilder:
         self._genes_to = genes_to
         self._restriction_gt = restriction_gt
         self._restriction_lt = restriction_lt
+        self._restriction_join = restriction_join
+        self._restriction_bool = restriction_bool
         self._preparsing_errors = error_messages
 
     def invalid_table(self):
@@ -210,6 +214,13 @@ class QueryBuilder:
                 i = float(value)
             except:
                 invalid_restriction.append("Bad value in restriction: %s < %s" % (column, value ))
+        for column, value in self._restriction_bool:
+            if column not in tbl_columns:
+                if value.strip() not in ['True', 'False']:
+                    invalid_restriction.append("Bad value in restriction: %s = %s" % (column, value))
+        if self._restriction_join.strip() not in ['intersect', 'union']:
+            invalid_restriction.append("Invalid restriction join [%s].  Valid values are intersect or join.")
+
         return invalid_restriction
 
     def validate_query(self):
@@ -248,15 +259,31 @@ class QueryBuilder:
                 value = float(value)
                 line = " %s < %.5f " % (column, value)
             WHERE.append(line)
+        for column, value in self._restriction_bool:
+            if value.strip() =='True':
+                WHERE.append(column)
+            else:
+                WHERE.append('NOT %s' % (column,))
+        gstring = ''
         if len(self._genes_to):
             gf = ','.join(self._genes_from)
             gt = ','.join(self._genes_to)
-            WHERE.append("((Gene1 IN (%s) AND Gene2 IN (%s)) OR (Gene1 IN (%s) AND Gene2 IN (%s)))" % (gf, gt, gt, gf))
+            gstring = "((Gene1 IN (%s) AND Gene2 IN (%s)) OR (Gene1 IN (%s) AND Gene2 IN (%s)))" % (gf, gt, gt, gf)
         elif len(self._genes_from):
             gf = ','.join(self._genes_from)
-            WHERE.append("((Gene1 IN (%s) OR Gene2 IN (%s)))" % (gf, gf))
-        if len(WHERE):
-            WHERE = "WHERE " + ' AND '.join(WHERE)
+            gstring = "((Gene1 IN (%s) OR Gene2 IN (%s)))" % (gf, gf)
+        if len(WHERE) and len(gstring):
+            if self._restriction_join == 'intersect':
+                WHERE = "WHERE " + gstring + ' AND ( %s )' % (' AND '.join(WHERE),)
+            else:
+                WHERE = "WHERE " + gstring + ' AND (%s )' % (' OR '.join(WHERE),)
+        elif len(WHERE):
+            if self._restriction_join == 'intersect':
+                WHERE = "WHERE " + ' AND '.join(WHERE)
+            else:
+                WHERE = "WHERE " + gstring + ' AND (%s )' % (' OR '.join(WHERE),)
+        elif len(gstring):
+            WHERE = "WHERE " + gstring
         else:
             WHERE = ''
         query = '\n'.join([SELECT, FROM, WHERE])
@@ -264,13 +291,13 @@ class QueryBuilder:
         query += debug
         glogger.debug("Generated query [%s]" % (query))
         return query
-    
+
     def get_table(self):
         gi = GoogleInterface()
         ds = gi.bq_client.dataset(self._dataset)
         tbl = ds.table(self._table)
         return tbl
-    
+
     def get_column_names(self):
         tbl = self.get_table()
         if tbl.exists():
@@ -279,6 +306,11 @@ class QueryBuilder:
         else:
             glogger.exception("No such table [%s.%s]" % (self._project, self._table))
             raise Exception("No such table [%s.%s]" % (self._project, self._table))
+
+
+    def list_tables(self):
+        gi = GoogleInterface()
+        return [table for table in gi.bq_client.dataset(self._dataset) .list_tables()]
 
     @classmethod
     def from_request(cls, request):
@@ -294,8 +326,6 @@ class QueryBuilder:
             for i in range(len(rlist)/2):
                 restrictions.append((rlist[2*i], rlist[2*i+1]))
             return restrictions
-
-
         error_messages = []
         rj = request
         args = {}
@@ -317,8 +347,14 @@ class QueryBuilder:
                 args['restriction_gt'] = parse_restrictions(rj['restriction_gt'])
             except:
                 error_messages += ['Unparseable restriction_gt [%s]' % (rj['restriction_gt'],)]
+        if 'restriction_bool' in rj:
+            try:
+                args['restriction_bool'] = parse_restrictions(rj['restriction_bool'])
+            except:
+                error_messages += ['Unparseable restriction_bool [%s]' % (rj['restriction_bool'],)]
+        if 'restriction_join' in rj:
+                args['restriction_join'] = rj['restriction_join']
         if len(error_messages) > 0:
             args['error_messages'] = error_messages
-
         glogger.debug("Args object.[%s]" % (str(args),))
         return cls(**args)

@@ -44,6 +44,18 @@ A list of pairs of values `column name,value` with which to restrict the results
     example='TCGA_GBM_Correlation,.2, GTEx_Brain_Correlation,.2'
     ),
 
+    'restriction_bool': fields.String(description="""
+A list of pairs of values `column name,value` with which to restrict the results of the query to rows where the value of the column is True or False.
+""",
+    required=False,
+    example='BioGRID_Interaction,True'
+    ),
+    'restriction_join': fields.String(description="""
+The type of join made on restrictions.
+
+**Default**: intersect
+""", required=False, example='intersect', enum=['intersect','union']
+        ),
     'table':fields.String(description="""
 The table to select from.
 
