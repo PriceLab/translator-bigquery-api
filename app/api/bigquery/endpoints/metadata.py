@@ -33,7 +33,6 @@ class MetadataTableResources(Resource):
         """Retrieve list of available tables"""
         return ['All tables'], 200
 
-
 @ns.route('/init_db')
 class Initdb(Resource):
     def get(self):

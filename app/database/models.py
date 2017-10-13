@@ -25,7 +25,6 @@ class Table(db.Model):
     description = db.Column(db.String(1000))
     num_rows = db.Column(db.Integer)
     num_bytes = db.Column(db.Integer)
-    disabled = db.Column(db.Boolean, default=False)
 
 class Study(db.Model):
     __tablename__ = "study"
@@ -45,10 +44,8 @@ class Substudy(db.Model):
 
 class SubstudyTissue(db.Model):
     __tablename__ = "substudytissue"
-    id = db.Column(db.Integer, primary_key=True)
-    substudy_id_1 = db.Column(db.Integer, db.ForeignKey('substudy.id'))
-    substudy_id_2 = db.Column(db.Integer, db.ForeignKey('substudy.id'))
-
+    substudy_id_1 = db.Column(db.Integer, db.ForeignKey('substudy.id'), primary_key=True)
+    substudy_id_2 = db.Column(db.Integer, db.ForeignKey('substudy.id'), primary_key=True)
 
 class Column(db.Model):
     __tablename__ = "columns"
@@ -56,6 +53,7 @@ class Column(db.Model):
     name = db.Column(db.String(80))
     table_id = db.Column(db.Integer, db.ForeignKey('table.id'))
     similarity_type = db.Column(db.String(80))
+    datatype = db.Column(db.String(80))
     substudy_id = db.Column(db.Integer, db.ForeignKey('study.id'))
 
 

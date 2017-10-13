@@ -307,6 +307,14 @@ class QueryBuilder:
             glogger.exception("No such table [%s.%s]" % (self._project, self._table))
             raise Exception("No such table [%s.%s]" % (self._project, self._table))
 
+    def get_table_schema(self):
+        tbl = self.get_table()
+        if tbl.exists():
+            tbl.reload()
+            return [sc for sc in tbl.schema]
+        else:
+            glogger.exception("No such table [%s.%s]" % (self._project, self._table))
+            raise Exception("No such table [%s.%s]" % (self._project, self._table))
 
     def list_tables(self):
         gi = GoogleInterface()
