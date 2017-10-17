@@ -74,3 +74,9 @@ Available tables are provided by  `/api/metadata/tables`.
 """ % settings.BIGQUERY_DEFAULT_TABLE
 )
 
+query_url_parser.add_argument('limit', help="""
+The maximum number of rows to return.
+
+
+**Default**: 10000
+""" )

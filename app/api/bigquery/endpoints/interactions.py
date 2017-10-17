@@ -13,7 +13,7 @@ from app import settings
 
 log = logging.getLogger(__name__)
 
-ns = api.namespace('similarity', 
+ns = api.namespace('interactions', 
         description="""Mine the interaction profiles of various
         entities
         """)
@@ -21,7 +21,7 @@ ns = api.namespace('similarity',
 
 @ns.doc(params={'request_id': 'The request id for a query'})
 @ns.route('/query/status/<string:request_id>')
-class SimilarityStatus(Resource):
+class InteractionsStatus(Resource):
     @ns.doc( model=query_status_response, 
             responses={'200':'OK', '404': 'Request id not found'})
     def get(self, request_id):
@@ -33,7 +33,7 @@ class SimilarityStatus(Resource):
             return result, 200
 
 @ns.route('/query')
-class SimilarityQuery(Resource):
+class InteractionsQuery(Resource):
     
     @ns.response(400, "Bad query request.")
     @ns.response(200, "OK")

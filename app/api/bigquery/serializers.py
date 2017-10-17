@@ -56,6 +56,12 @@ The type of join made on restrictions.
 **Default**: intersect
 """, required=False, example='intersect', enum=['intersect','union']
         ),
+    'limit': fields.Integer(description="""
+The maximum number of rows to return.
+
+**Default**: 10000
+""", required=False, example=10000
+        ),
     'table':fields.String(description="""
 The table to select from.
 
@@ -97,9 +103,78 @@ query_response = api.model('The query response.', {
         'message': fields.String(description="""Error messages if status is __error__""")
     })
 
+table_response_short = api.model('Table', {
+    'name' :fields.String(description="Table name"),
+    'description' :fields.String(description="Table description"),
+    'num_rows' :fields.Integer(description="Number of rows in table"),
+    'num_bytes': fields.Integer(description="Number of bytes in table"),
+    'default': fields.Boolean(description="Is default table")
+    })
+
+
+study_response = api.model('Study', {
+        'name': fields.String(description='The name of this study'),
+        'description': fields.String(description='The description of this study'),
+    })
+
+substudy_response = api.model('Substudy',{
+    'name': fields.String(description="Sub-study name"),
+    'description': fields.String(description="Substudy description"),
+    'cell_of_origin': fields.String(description="The cell type used."),
+    'tissue_hierarchy': fields.String(description="The Brenda tissue hierarchy of the cell of origin"),
+    'study': fields.Nested(study_response)
+
+    })
+
+column_response = api.model('Column', {
+    'name':fields.String(description="Column description"),
+    'interactions_type':fields.String(description="The type of interaction measured"),
+    'datatype': fields.String(description="The datatype"),
+    'substudy': fields.Nested(substudy_response)
+})
 table_response = api.model('Table', {
     'name' :fields.String(description="Table name"),
     'description' :fields.String(description="Table description"),
     'num_rows' :fields.Integer(description="Number of rows in table"),
-    'num_bytes': fields.Integer(description="Number of bytes in table")
+    'num_bytes': fields.Integer(description="Number of bytes in table"),
+    'columns': fields.List(fields.Nested(column_response)),
+    'default': fields.Boolean(description="Is default table")
     })
+
+
+table_name_only = api.model('Table', {
+    'name':fields.String(description="Table name")
+    })
+
+
+column_response_no_substudy = api.model('Column', {
+    'name':fields.String(description="Column description"),
+    'interactions_type':fields.String(description="The type of interaction measured"),
+    'datatype': fields.String(description="The datatype"),
+    'table': fields.Nested(table_name_only)
+})
+
+substudy_child = api.model('Substudy',{
+    'name': fields.String(description="Sub-study name"),
+    'description': fields.String(description="Substudy description"),
+    'cell_of_origin': fields.String(description="The cell type used."),
+    'tissue_hierarchy': fields.String(description="The Brenda tissue hierarchy of the cell of origin"),
+    'columns': fields.List(fields.Nested(column_response_no_substudy))
+    })
+
+
+study_response_test = api.model('Study', {
+        'name': fields.String(description='The name of this study'),
+        'description': fields.String(description='The description of this study'),
+        'substudies': fields.List( fields.Nested( substudy_child ))
+    })
+
+unique_tissue_list = api.model('Tissues', {'tissues': fields.List(
+    fields.String( description="A tissue"))})
+
+tissue_substudy = api.model('TissueSubstudies', {
+    'tissue' : fields.String(description='The tissue'),
+    'substudies': fields.List(fields.Nested(substudy_child))
+    })
+
+

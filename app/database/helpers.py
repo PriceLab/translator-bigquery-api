@@ -15,9 +15,11 @@ def populate_database():
     log.debug("Adding project")
     project = Project(name=settings.BIGQUERY_PROJECT)
     db.session.add(project)
+    db.session.commit()
     log.debug("Adding dataset")
     dataset = Dataset(name=settings.BIGQUERY_DATASET, project_id=project.id)
     db.session.add(dataset)
+    db.session.commit()
 
     qb = QueryBuilder(table=None)
     tmeta = []
@@ -28,8 +30,10 @@ def populate_database():
         log.debug("Adding table [%s]" % (t.name))
         dt = Table(name=t.name, description=t.description, 
                    dataset_id=dataset.id, num_rows=t.num_rows, 
-                   num_bytes=t.num_bytes)
+                   num_bytes=t.num_bytes, 
+                   default=True if t.name == settings.BIGQUERY_DEFAULT_TABLE else False)
         db.session.add(dt)
+        db.session.commit()
         md_file = os.path.join(settings.BIGQUERY_METADATA_DIRECTORY,
                                "%s.tsv" % (t.name,))
         # a metadata file is present, annotate metadata
@@ -40,26 +44,22 @@ def populate_database():
             ca = ca.set_index('Column_ID')
             qb2 = QueryBuilder(table=t.name)
             columns = qb2.get_table_schema()
+            tissues = ca.columns.tolist()[8:]
             for column in columns:
                 if column.name in ['GPID','Gene1','Gene2']:
                     #don't document these columns
                     pass     
                 else:
-                    log.debug("Adding column [%s.%s]" % (dt.name, c.name) )
+                    log.debug("Adding column [%s.%s]" % (dt.name, column.name) )
                     column_id = '_'.join(column.name.split('_')[:-1])
-                    similarity_type = column.name.split('_')[-1]
-                    c = Column(name=column.name, 
-                            table_id=dt.id, 
-                            similarity_type=similarity_type,
-                            datatype=column.field_type
-                            )
+                    interactions_type = column.name.split('_')[-1]
                     cmd = ca.loc[column_id]
                     if cmd['Study'] not in studies:
                         log.debug("Creating study [%s]" % (cmd['Study'],))
-                        study = Study(abbr=cmd['Study'], 
-                                name=cmd['Study'],
+                        study = Study( name=cmd['Study'],
                                 description=cmd['Study'])
                         db.session.add(study)
+                        db.session.commit()
                         studies.add(cmd['Study'])
                     else:
                         study = db.session.query(Study).filter(
@@ -72,13 +72,28 @@ def populate_database():
                                 tissue_hierarchy=cmd['Tissue Hierarchy'],
                                 study_id=study.id)
                         db.session.add(substudy)
-                        studies.add(cmd['Study ID'])
+                        db.session.commit()
+                        for t in cmd[tissues].dropna().index.tolist():
+                            log.debug("Adding [%i-%s]" % (substudy.id, t))
+                            tissue=SubstudyTissue(substudy_id=substudy.id,
+                                    tissue=t)
+                            db.session.add(tissue)
+                        db.session.commit()
+                        substudies.add(cmd['Study ID'])
                     else:
                         substudy = db.session.query(Substudy).filter(
                                 Substudy.name ==cmd['Study ID']).first()
-                    c.substudy_id = substudy.id
+                    log.debug("ssid %i" % substudy.id)
+                    c = Column(name=column.name, 
+                            table_id=dt.id, 
+                            interactions_type=interactions_type,
+                            datatype=column.field_type,
+                            substudy_id=substudy.id
+                            )
                     db.session.add(c)
-        else:
+                    db.session.commit()
+        elif False:
+            pass
             log.debug("Adding columns for %s" % (t.name))
             qb2 = QueryBuilder(table=t.name)
             columns = qb2.get_table_schema()
@@ -86,12 +101,12 @@ def populate_database():
                 if column.name in ['GPID','Gene1','Gene2']:
                     pass     
                 else:
-                    log.debug("Adding column [%s.%s]" % (dt.name, c.name) )
+                    log.debug("Adding column [%s.%s]" % (dt.name, column.name) )
                     column_id = '_'.join(column.name.split('_')[:-1])
-                    similarity_type = column.name.split('_')[-1]
+                    interactions_type = column.name.split('_')[-1]
                     c = Column(name=column.name, 
                             table_id=dt.id, 
-                            similarity_type=similarity_type,
+                            interactions_type=interactions_type,
                             datatype=column.field_type
                             )
                     db.session.add(c)

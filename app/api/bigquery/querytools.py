@@ -156,6 +156,7 @@ class QueryBuilder:
             restriction_lt=[],
             restriction_bool=[],
             restriction_join='intersect',
+            limit=10000,
             error_messages=[]):
         self._project = settings.BIGQUERY_PROJECT
         self._dataset = settings.BIGQUERY_DATASET
@@ -167,6 +168,7 @@ class QueryBuilder:
         self._restriction_lt = restriction_lt
         self._restriction_join = restriction_join
         self._restriction_bool = restriction_bool
+        self._limit = limit
         self._preparsing_errors = error_messages
 
     def invalid_table(self):
@@ -179,6 +181,13 @@ class QueryBuilder:
         tbl_columns = self.get_column_names()
         missing_columns = ["Bad column: %s" % c for c in self._columns if c not in tbl_columns]
         return missing_columns
+
+    def invalid_limit(self):
+        try:
+            i = int(self._limit)
+            return []
+        except:
+            return ["Bad limit: [%s]" % (self._limit,)]
 
     def invalid_genes(self):
         bad_genes = []
@@ -228,8 +237,9 @@ class QueryBuilder:
         ic = self.invalid_columns()
         ig = self.invalid_genes()
         ir = self.invalid_restrictions()
+        il = self.invalid_limit()
 
-        errors = self._preparsing_errors + it + ic + ir + ig
+        errors = self._preparsing_errors + it + ic + ir + ig + il
         return errors
 
     def generate_query(self):
@@ -281,14 +291,14 @@ class QueryBuilder:
             if self._restriction_join == 'intersect':
                 WHERE = "WHERE " + ' AND '.join(WHERE)
             else:
-                WHERE = "WHERE " + gstring + ' AND (%s )' % (' OR '.join(WHERE),)
+                WHERE = "WHERE "  + ' OR '.join(WHERE)
         elif len(gstring):
             WHERE = "WHERE " + gstring
         else:
             WHERE = ''
-        query = '\n'.join([SELECT, FROM, WHERE])
-        debug = " LIMIT 100"
-        query += debug
+
+        LIMIT = "LIMIT %i" % (int(self._limit),)
+        query = '\n'.join([SELECT, FROM, WHERE, LIMIT])
         glogger.debug("Generated query [%s]" % (query))
         return query
 
