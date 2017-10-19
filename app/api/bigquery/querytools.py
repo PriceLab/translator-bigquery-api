@@ -328,8 +328,9 @@ class QueryBuilder:
 
     def list_tables(self):
         gi = GoogleInterface()
-        md = [settings.BIGQUERY_METADATA_TISSUES, 
-                settings.BIQUERY_METADATA_TISSUES]
+        # ignore metadata tables
+        md = [settings.BIGQUERY_METADATA_COLUMNS, 
+                settings.BIGQUERY_METADATA_TISSUES]
         tables = [] 
         for table in gi.bq_client.dataset(self._dataset).list_tables():
             if table.name not in md:
