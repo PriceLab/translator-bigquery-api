@@ -328,7 +328,13 @@ class QueryBuilder:
 
     def list_tables(self):
         gi = GoogleInterface()
-        return [table for table in gi.bq_client.dataset(self._dataset) .list_tables()]
+        md = [settings.BIGQUERY_METADATA_TISSUES, 
+                settings.BIQUERY_METADATA_TISSUES]
+        tables = [] 
+        for table in gi.bq_client.dataset(self._dataset).list_tables():
+            if table.name not in md:
+                tables.append(table)
+        return tables
 
     @classmethod
     def from_request(cls, request):

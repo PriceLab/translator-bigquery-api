@@ -7,6 +7,34 @@ import pandas
 
 log = logging.getLogger(__name__)
 
+def get_metadata_columns():
+    query = """Select *
+           FROM [%s:%s.%s]
+           """ % (settings.BIGQUERY_PROJECT, settings.BIGQUERY_DATASET,
+                   settings.BIQUERY_METADATA_COLUMNS)
+    gi = GoogleInterface()
+    query_job = gi.bq_client.run_async_query(str(uuid.uuid4()), query)
+
+    query_job.begin()
+    query_job.result()  # Wait for job to complete.
+
+    # Print the results.
+    destination_table = query_job.destination
+    destination_table.reload()
+    columns = [x[0] for x in destination_table.schema[:]]
+    table = [row for row in destination_table.fetch_data()]
+    return pandas.DataFrame(table, columns=columns)
+
+
+
+def add_table(table):
+    dt = Table(name=t.name, description=t.description, 
+               dataset_id=dataset.id, num_rows=t.num_rows, 
+               num_bytes=t.num_bytes, 
+               default=True if t.name == settings.BIGQUERY_DEFAULT_TABLE else False)
+    db.session.add(dt)
+    db.session.commit()
+    return dt
 
 def populate_database():
     from app.database.models import Project, Dataset, Table, Study, Substudy, \
@@ -28,14 +56,7 @@ def populate_database():
     for t in qb.list_tables():
         t.reload()
         log.debug("Adding table [%s]" % (t.name))
-        dt = Table(name=t.name, description=t.description, 
-                   dataset_id=dataset.id, num_rows=t.num_rows, 
-                   num_bytes=t.num_bytes, 
-                   default=True if t.name == settings.BIGQUERY_DEFAULT_TABLE else False)
-        db.session.add(dt)
-        db.session.commit()
-        md_file = os.path.join(settings.BIGQUERY_METADATA_DIRECTORY,
-                               "%s.tsv" % (t.name,))
+        dt = add_table(table)
         # a metadata file is present, annotate metadata
 
         if os.path.exists(md_file):
