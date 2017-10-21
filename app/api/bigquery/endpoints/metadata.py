@@ -110,9 +110,10 @@ class Tissue(Resource):
             ns.abort(404, status='error', message="[%s] not a valid tissue" % (str(tissue_name),))
 
 
-@ns.route('/init_db/<string:password>')
+@ns.route('/init_db/<string:password>', doc=False)
 class Initdb(Resource):
     def get(self, password):
+        """This is a function that rebuilds the sqllite database"""
         import hashlib
         with open('/cred/database_reset.json') as pword_file:
             hashed = json.load(pword_file)
