@@ -10,6 +10,7 @@ from app.database.helpers import populate_database
 from app.database.models import *
 from app import settings
 from app.database import db
+import json
 
 
 log = logging.getLogger(__name__)
@@ -109,7 +110,13 @@ class Tissue(Resource):
             ns.abort(404, status='error', message="[%s] not a valid tissue" % (str(tissue_name),))
 
 
-@ns.route('/init_db')
+@ns.route('/init_db/<string:password>')
 class Initdb(Resource):
-    def get(self):
-        populate_database()
+    def get(self, password):
+        import hashlib
+        with open('/cred/database_reset.json') as pword_file:
+            hashed = json.load(pword_file)
+        if hashed['password'] == hashlib.sha224(password).hexdigest():
+            populate_database()
+        else:
+            ns.abort(401, status='error', message="Not a valid password")

@@ -16,6 +16,7 @@ SQLALCHEMY_TRACK_MODIFICATIONS = False
 #Bigquery settings
 
 BIGQUERY_KEY = '/cred/miRNA project-01ca75e6de66.json'
+BIGQUERY_DATABASE_PASSWORD = '/cred/database_reset.json'
 BIGQUERY_BUCKET = 'ncats_bigquery_results'
 BIGQUERY_PROJECT = 'isb-cgc-04-0010'
 BIGQUERY_DATASET = 'NTTB_BigGIM'
