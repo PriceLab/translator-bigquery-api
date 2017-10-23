@@ -74,9 +74,9 @@ class MetadataStudies(Resource):
 @ns.doc(params={'study_name': 'the name of a Big GIM study'})
 @ns.route('/study/<string:study_name>')
 class MetadataStudy(Resource):
-    """Return a single study and associated substudies"""
     @ns.marshal_with(study_response_test, code=200)
     def get(self, study_name):
+        """Return a single study and associated substudies"""
         result =Study.query.filter_by(name=study_name).first()
         if result:
             return result, 200
@@ -113,14 +113,14 @@ class Tissue(Resource):
 
 @ns.route("/swagger")
 class SwaggerSpec(Resource):
-    """Return the swagger 2.0 spec for this API"""
     def get(self):
+        """Return the swagger v2 spec for this API"""
         return api.__schema__, 200
 
 @ns.route("/openapiv3")
 class OpenAPISpec(Resource):
-    """Return the swagger 2.0 spec for this API"""
     def get(self):
+        """Return the OpenAPI v3 spec for this API"""
         import urllib
         swagger_path = "http://%s/api/metadata/%s" % (settings.FLASK_SERVER_NAME, 'swagger')
         converter_path = "https://openapi-converter.herokuapp.com/api/v1/convert"
