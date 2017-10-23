@@ -6,6 +6,8 @@ from google.cloud import storage
 import uuid, logging
 import time
 import numpy as np
+from datetime import datetime, timedelta
+
 
 glogger = logging.getLogger()
 KEY = settings.BIGQUERY_KEY
@@ -14,6 +16,18 @@ PROJECT = settings.BIGQUERY_PROJECT
 
 def not_found_error(job):
     return len([x for x in job.errors if 'notFound' in x.values()]) > 0
+
+def extract_result(query_job):
+    glogger.debug("Extracting query job")
+    gi = GoogleInterface()
+    query_job_id = query_job.name
+    job_id = gi.get_job_id( query_job_id )
+    glogger.debug("Job id")
+    destination_table = query_job.destination
+    glogger.debug("Submitting extraction")
+    gi.extract_job(job_id, destination_table, trial=0)
+    glogger.debug("Extraction running")
+
 
 def extract_callback(extract_job):
     """
@@ -68,6 +82,7 @@ class GoogleInterface:
     """
     def __init__(self, key=KEY):
         self._key = key
+        self._allow_big_results = True 
 
     @property
     def bq_client(self):
@@ -84,26 +99,41 @@ class GoogleInterface:
         return "ej-%i-%s" % ( trial, request_id)
 
     def get_job_id(self, compound_id):
-        return compound_id.split('-')[-1]
+        return '-'.join(compound_id.split('-')[2:])
+
+    def get_temp_table_name(self, request_id):
+        return "_temp_%s" % (request_id.replace('-','_'))
 
     def query(self, query, bucket_name=BUCKET):
         glogger.debug("Running query")
         request_id = str(uuid.uuid4())
         query_job = self.bq_client.run_async_query(self.get_query_job_id(request_id), query)
+        query_job.use_legacy_sql = False
+        glogger.debug("Starting query job")
+        if self._allow_big_results:
+            glogger.debug("Creating temp table for large results")
+            ds =  self.bq_client.dataset(settings.BIGQUERY_DATASET)
+            table = ds.table(name=self.get_temp_table_name(request_id))
+            table.expires = datetime.now() + timedelta(hours=1) 
+            table.create()
+            query_job.create_disposition = 'WRITE_TRUNCATE'
+            query_job.destination_table = table
         query_job.begin()
-        # Print the results.
-        destination_table = query_job.destination
-        glogger.debug("%s" % (destination_table,))
-        self.extract_job(request_id, destination_table)
+
+        query_job.add_done_callback(extract_result)
         return request_id
 
     def extract_job(self, request_id, destination_table, trial=0):
+        glogger.debug("Setting up extract job")
         extract_job = self.bq_client.extract_table_to_storage(
             self.get_extract_job_id(request_id, trial=trial), destination_table,
             'gs://%s/%s*.csv' % (settings.BIGQUERY_BUCKET, request_id))
         extract_job.destination_format = 'CSV'
+        glogger.debug("Setting up extract job")
         extract_job.begin()
+        glogger.debug("Adding extract call_back")
         extract_job.add_done_callback(extract_callback)
+        glogger.debug("Leaving extract job")
 
 
     def list_blobs(self, bucket_name=BUCKET, prefix=''):
@@ -228,7 +258,7 @@ class QueryBuilder:
                 if value.strip() not in ['True', 'False']:
                     invalid_restriction.append("Bad value in restriction: %s = %s" % (column, value))
         if self._restriction_join.strip() not in ['intersect', 'union']:
-            invalid_restriction.append("Invalid restriction join [%s].  Valid values are intersect or join.")
+            invalid_restriction.append("Invalid restriction join [%s].  Valid values are intersect or union.")
 
         return invalid_restriction
 
@@ -248,7 +278,7 @@ class QueryBuilder:
             SELECT = 'SELECT ' + ', '.join(sbase + self._columns)
         else:
             SELECT = 'SELECT * '
-        FROM = "FROM [%s:%s.%s]" % (self._project, self._dataset, self._table)
+        FROM = "FROM `%s.%s.%s`" % (self._project, self._dataset, self._table)
         WHERE = []
         for column, value in self._restriction_gt:
 
@@ -329,11 +359,13 @@ class QueryBuilder:
     def list_tables(self):
         gi = GoogleInterface()
         # ignore metadata tables
-        md = [settings.BIGQUERY_METADATA_COLUMNS, 
+        md = [settings.BIGQUERY_METADATA_COLUMNS,
                 settings.BIGQUERY_METADATA_TISSUES]
-        tables = [] 
+        def is_temp(tname):
+            return tname.find('_temp') > -1
+        tables = []
         for table in gi.bq_client.dataset(self._dataset).list_tables():
-            if table.name not in md:
+            if table.name not in md and not is_temp(table.name):
                 tables.append(table)
         return tables
 
@@ -379,6 +411,8 @@ class QueryBuilder:
                 error_messages += ['Unparseable restriction_bool [%s]' % (rj['restriction_bool'],)]
         if 'restriction_join' in rj:
                 args['restriction_join'] = rj['restriction_join']
+        if 'limit' in rj:
+                args['limit'] = rj['limit']
         if len(error_messages) > 0:
             args['error_messages'] = error_messages
         glogger.debug("Args object.[%s]" % (str(args),))

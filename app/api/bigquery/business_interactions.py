@@ -12,16 +12,6 @@ glogger = logging.getLogger()
 KEY = settings.BIGQUERY_KEY
 BUCKET = settings.BIGQUERY_BUCKET
 
-def test_business(data):
-    return "test_business"
-
-
-def list_files(request_id):
-    pass
-
-def list_tables(project, dataset):
-    pass
-    
 
 def get_request_status(request_id):
 
@@ -37,25 +27,41 @@ def get_request_status(request_id):
     query_job_id = gi.get_query_job_id(request_id)
     glogger.debug("Searching for %s query job" % (query_job_id,))
     query_job = gi.get_job(query_job_id)
-
+    ctr = 0
+    while query_job is None:
+        time.sleep(.5)
+        query_job = gi.get_job(query_job_id)
+        ctr += 1
+        if ctr > 5:
+            break
     result = {'request_id':request_id}
     if query_job is None:
         result['status'] = 'error'
-        result['message'] = 'No such request'
+        result['message'] = 'No such request - Missing query job.'
     elif query_job.state != 'DONE':
         result['status'] = 'running'
-        glogger.debug("%s query job still running" % (extract_job_id,))
+        result['message'] = 'Query job is running.'
+        glogger.debug("%s query job still running" % (query_job_id,))
         return result
-    else:
+    elif query_job.errors == None:
         extract_job_id = gi.get_extract_job_id(request_id)
         glogger.debug("Searching for %s extract job" % (extract_job_id,))
         extract_job = gi.get_job(extract_job_id)
+        ctr = 0
+        while extract_job is None:
+            time.sleep(1)
+            extract_job = gi.get_job(extract_job_id)
+            ctr += 1
+            glogger.debug("Extract job not found.  May be between ej/qj")
+            if ctr > 5:
+                break
         if extract_job is None:
             result['status'] = 'error'
-            result['message'] = 'No such request'
+            result['message'] = 'Extraction not found. Might retry.'
             glogger.debug("Extract job %s not found." % (extract_job_id,))
         elif extract_job.state != 'DONE':
             result['status'] = 'running'
+            result['message'] = 'Extraction job is running.'
         else:
             qr = query_job.query_results()
             result['rows'] = qr.total_rows
@@ -67,6 +73,12 @@ def get_request_status(request_id):
             #glogger.debug("rows: %s" % (tbl.reload().num_rows,))
             result['request_uri'] = gi.get_urls( request_id ) 
             result['status'] = 'complete'
+    elif query_job.errors is not None:
+        glogger.exception("Error in query job[%s]" % (str(query_job.errors),))
+        result['status'] = 'error'
+        result['message'] = ''
+        for error in query_job.errors:
+            result['message'] += "Query job failed with [%s]." % (error['reason'],)
     return result
 
 def run_query(request):

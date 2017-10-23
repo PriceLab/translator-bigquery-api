@@ -3,7 +3,7 @@ import logging
 
 from flask import request
 from flask_restplus import Resource
-from app.api.bigquery.business import list_files, get_request_status, run_query
+from app.api.bigquery.business_interactions import get_request_status, run_query
 from app.api.bigquery.serializers import query_request, query_status_response, query_response
 from app.api.bigquery.parsers import query_url_parser
 
@@ -34,14 +34,15 @@ class InteractionsStatus(Resource):
 
 @ns.route('/query')
 class InteractionsQuery(Resource):
-    
     @ns.response(400, "Bad query request.")
     @ns.response(200, "OK")
     @ns.doc(model=query_response)
     @ns.expect(query_url_parser, validate=False)
     def get(self):
         """Submit a new query request."""
+        log.info("Initiating query")
         results = run_query(request.values.to_dict())
+        log.info("Query submission finished")
         if results['status'] == 'error':
             log.debug("Error in query %s" % (results))
             return results, 400
