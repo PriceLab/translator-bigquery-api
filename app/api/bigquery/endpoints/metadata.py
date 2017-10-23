@@ -129,7 +129,11 @@ class OpenAPISpec(Resource):
                                urllib.urlencode({'url':swagger_path}))
         req = requests.get(full_path, headers=headers)
         req.raise_for_status()
-        return req.json(), 200
+        result = req.json()
+        # smartapi stuff
+        result['tags'] = [{'name':'translator'}]
+        result['info']['contact'] = {'name': 'John C. Earls', 'email':'john.c.earls@gmail.com'}
+        return result, 200
 
 
 
