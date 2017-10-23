@@ -10,6 +10,7 @@ from app.database.helpers import populate_database
 from app.database.models import *
 from app import settings
 from app.database import db
+import requests
 import json
 
 
@@ -108,6 +109,28 @@ class Tissue(Resource):
             return {'tissue':tissue_name, 'substudies':substudies}, 200
         else:
             ns.abort(404, status='error', message="[%s] not a valid tissue" % (str(tissue_name),))
+
+
+@ns.route("/swagger")
+class SwaggerSpec(Resource):
+    """Return the swagger 2.0 spec for this API"""
+    def get(self):
+        return api.__schema__, 200
+
+@ns.route("/openapiv3")
+class OpenAPISpec(Resource):
+    """Return the swagger 2.0 spec for this API"""
+    def get(self):
+        import urllib
+        swagger_path = "http://%s/api/metadata/%s" % (settings.FLASK_SERVER_NAME, 'swagger')
+        converter_path = "https://openapi-converter.herokuapp.com/api/v1/convert"
+        headers = {'accept':'application/json'}
+        full_path = "%s?%s" % (converter_path, 
+                               urllib.urlencode({'url':swagger_path}))
+        req = requests.get(full_path, headers=headers)
+        req.raise_for_status()
+        return req.json(), 200
+
 
 
 @ns.route('/init_db/<string:password>', doc=False)
