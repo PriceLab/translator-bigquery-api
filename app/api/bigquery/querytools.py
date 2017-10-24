@@ -281,23 +281,10 @@ class QueryBuilder:
         FROM = "FROM `%s.%s.%s`" % (self._project, self._dataset, self._table)
         WHERE = []
         for column, value in self._restriction_gt:
-
-            if column.find('Pvalue') > -1:
-                # pvalues are stored as neg log
-                value = -1*np.log10(float(value))
-                line = " %s < %.5f " % (column, value)
-            else:
-                value = float(value)
-                line = " %s > %.5f " % (column, value)
             line = " %s > %.5f " % (column, float(value))
             WHERE.append(line)
         for column, value in self._restriction_lt:
-            if column.find('Pvalue') > -1:
-                value = -1*np.log10(float(value))
-                line = " %s > %.5f " % (column, value)
-            else:
-                value = float(value)
-                line = " %s < %.5f " % (column, value)
+            line = " %s < %.5f " % (column,float(value) )
             WHERE.append(line)
         for column, value in self._restriction_bool:
             if value.strip() =='True':

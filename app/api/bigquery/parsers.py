@@ -42,7 +42,7 @@ A list of pairs of values `column name,value` with which to restrict the results
 
 **Default**: No restrictions
 
-**Example**:TCGA_GBM_Pvalue,.05, GTEx_Brain_Pvalue,.05
+**Example**:TCGA_GBM_Pvalue,1.3, GTEx_Brain_Pvalue,1.3
 """)
 query_url_parser.add_argument( 'restriction_gt', help="""
 A list of pairs of values `column name,value` with which to restrict the results of the query to rows where the value of the column is greater than the given value.
