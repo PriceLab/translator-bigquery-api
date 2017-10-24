@@ -90,7 +90,7 @@ query_status_response = api.model('Query request status', {
         'message': fields.String(description="""Error messages if status is __error__""")
         })
 
-query_response = api.model('The query response.', {
+query_response = api.model('The query response', {
     'request_id' :  fields.String(readOnly=True,
             description='The request id generated.',
             ),
