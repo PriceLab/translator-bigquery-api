@@ -1,6 +1,6 @@
 # Flask settings
 
-FLASK_SERVER_NAME = 'isbtranslatorapi.adversary.us:8080'
+FLASK_SERVER_NAME = 'biggim.ncats.io'
 FLASK_DEBUG = False  # Do not use debug mode in production
 
 # Flask-Restplus settings
