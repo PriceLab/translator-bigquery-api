@@ -21,7 +21,7 @@ log = logging.getLogger(__name__)
 
 
 def configure_app(flask_app):
-    #flask_app.config['SERVER_NAME'] = settings.FLASK_SERVER_NAME
+    flask_app.config['SERVER_NAME'] = settings.FLASK_SERVER_NAME
     flask_app.config['SQLALCHEMY_DATABASE_URI'] = settings.SQLALCHEMY_DATABASE_URI
     flask_app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = settings.SQLALCHEMY_TRACK_MODIFICATIONS
     flask_app.config['SWAGGER_UI_DOC_EXPANSION'] = settings.RESTPLUS_SWAGGER_UI_DOC_EXPANSION
@@ -47,7 +47,7 @@ initialize_app(app)
 
 @app.route("/")
 def hello():
-    return "Hello World from Flask in a uWSGI Nginx Docker container with  Python 2.7 (default)"
+    return """<a href="http://biggim.ncats.io/api/">http://biggim.ncats.io/api/</a>"""
 
 if __name__ == '__main__':
     log.info('>>>>> Starting development server at http://{}/api/ <<<<<'.format(app.config['SERVER_NAME']))

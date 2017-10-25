@@ -122,6 +122,7 @@ class OpenAPISpec(Resource):
     def get(self):
         """Return the OpenAPI v3 spec for this API"""
         import urllib
+        # use api coverter api to go from swagger -> openapi v3
         swagger_path = "http://%s/api/metadata/%s" % (settings.FLASK_SERVER_NAME, 'swagger')
         converter_path = "https://openapi-converter.herokuapp.com/api/v1/convert"
         headers = {'accept':'application/json'}
@@ -131,8 +132,14 @@ class OpenAPISpec(Resource):
         req.raise_for_status()
         result = req.json()
         # smartapi stuff
-        result['tags'] = [{'name':'translator'}]
+        result['tags'] = [{'name':'translator'},{'name':'ISB'}, {'name':'gene'}, 
+                          {'name':'similarity'},{'name':'tissue'}, {'name':'TCGA'}, 
+                          {'name':'GIANT'}, {'name':'BioGrid'}, {'name':'GTEx'}, 
+                          {'name':'BigQuery'}, {'name':'network'}, {'name': 'DeepTranslate'}, 
+                          {'name':'query'} ]
         result['info']['contact'] = {'name': 'John C. Earls', 'email':'john.c.earls@gmail.com'}
+        servers = [{'url':"http://%s/api" % (settings.FLASK_SERVER_NAME,)}]
+        result['servers'] = servers
         return result, 200
 
 
