@@ -1,7 +1,7 @@
 # Flask settings
 
-FLASK_SERVER_NAME = 'biggim.ncats.io'
-FLASK_DEBUG = False  # Do not use debug mode in production
+FLASK_SERVER_NAME = 'isbtranslatorapi.adversary.us'#'biggim.ncats.io'
+FLASK_DEBUG = True  # Do not use debug mode in production
 
 # Flask-Restplus settings
 RESTPLUS_SWAGGER_UI_DOC_EXPANSION = 'list'
