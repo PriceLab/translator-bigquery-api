@@ -12,3 +12,4 @@ RUN pip install flask-cors
 
 RUN pip install google-cloud-bigquery
 RUN pip install google-cloud-storage
+RUN pip install ndex2
