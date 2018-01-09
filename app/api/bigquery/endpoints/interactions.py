@@ -3,8 +3,8 @@ import logging
 
 from flask import request
 from flask_restplus import Resource
-from app.api.bigquery.business_interactions import get_request_status, run_query
-from app.api.bigquery.serializers import query_request, query_status_response, query_response
+from app.api.bigquery.business_interactions import get_request_status, run_query, ndex
+from app.api.bigquery.serializers import query_request, query_status_response, query_response, ndex_request, ndex_response
 from app.api.bigquery.parsers import query_url_parser
 
 from app.api.restplus import api
@@ -18,6 +18,26 @@ ns = api.namespace('interactions',
         entities
         """)
 
+@ns.route('/ndex')
+class NDExSubmit(Resource):
+    @ns.doc(model=ndex_response)
+    @ns.expect(ndex_request)
+    def post(self):
+        log.info("%s" % (str(request.json),))
+        response = ndex(request.json)
+        code = 200 if response['status'] == 'complete' else 404
+        return response, code
+
+@ns.doc(params={'request_id': 'The request id for a query'})
+@ns.route('/ndex/<string:request_id>')
+class NDExSubmit(Resource):
+    @ns.doc(model=ndex_response)
+    def get(self, request_id):
+        log.info("%s" % (str(request.json),))
+        r = {'request_id': request_id}
+        response = ndex(r)
+        code = 200 if response['status'] == 'complete' else 404
+        return response, code
 
 @ns.doc(params={'request_id': 'The request id for a query'})
 @ns.route('/query/status/<string:request_id>')
