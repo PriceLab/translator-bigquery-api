@@ -215,3 +215,14 @@ tissue_substudy = api.model('TissueSubstudies', {
     })
 
 
+
+bigclam_query_request = api.model('BigClam request',{
+    'ids': fields.String( required=False,
+                        example="TCOF1,DDX46,COPE,RIPK1",
+                        description="""A comma delimited list of HGNC gene ids to select.
+
+**Default**: NONE.
+"""
+                        ),
+    })
+

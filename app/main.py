@@ -8,6 +8,7 @@ from flask import Flask, Blueprint
 from app import settings
 from app.api.bigquery.endpoints.interactions import ns as interactions
 from app.api.bigquery.endpoints.metadata import ns as metadata
+from app.api.bigquery.endpoints.bigclam import ns as bigclam
 from app.api.restplus import api
 from app.database import db
 
@@ -39,6 +40,7 @@ def initialize_app(app):
     api.init_app(blueprint)
     api.add_namespace(interactions)
     api.add_namespace(metadata)
+    api.add_namespace(bigclam)
     app.register_blueprint(blueprint)
     db.init_app(app)
     log.info("finished initialize")

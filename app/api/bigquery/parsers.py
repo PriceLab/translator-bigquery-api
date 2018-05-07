@@ -80,3 +80,8 @@ The maximum number of rows to return.
 
 **Default**: 10000
 """ )
+
+
+bigclam_query_url_parser = reqparse.RequestParser() 
+bigclam_query_url_parser.add_argument('ids', help="""A comma delimited list of HGNC gene ids to select.""")
+
