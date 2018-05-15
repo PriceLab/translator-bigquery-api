@@ -8,8 +8,13 @@ from sqlalchemy.orm.exc import NoResultFound
 log = logging.getLogger(__name__)
 
 log.debug("In restplus")
-api = Api(version='1.0', title='Big GIM(Gene Interaction Miner)',
-        description="""Big GIM (Gene Interaction Miner) is a Translator Knowledge Source that contains function interaction data for all pairs of genes. Functional interaction data are available from four different sources: 1) tissue-specific gene expression correlations from healthy tissue samples (GTEx), 2) tissue-specific gene expression correlations from cancer samples (TCGA), 3) tissue-specific probabilities of function interaction (GIANT), and 4) direct interactions (BioGRID). The data is stored as a Google BigQuery table enabling fast access.""")
+api = Api(version='1.0', title='Big GIM(Gene Interaction Miner) and Big CLAM(Cell Line Association Miner)',
+        description="""Big GIM (Gene Interaction Miner) is a Translator Knowledge Source that contains function interaction data for all pairs of genes. Functional interaction data are available from four different sources: 1) tissue-specific gene expression correlations from healthy tissue samples (GTEx), 2) tissue-specific gene expression correlations from cancer samples (TCGA), 3) tissue-specific probabilities of function interaction (GIANT), and 4) direct interactions (BioGRID). The data is stored as a Google BigQuery table enabling fast access.
+        
+        BIG CLAM (Cell Line Association Miner) is a Translator Knowledge Source.
+
+        
+        """)
 
 
 @api.errorhandler

@@ -13,7 +13,7 @@ from app import settings
 log = logging.getLogger(__name__)
 
 ns = api.namespace('bigclam', 
-        description="""Get some text from Theo """)
+        description="""Genomic aberrations""")
 
 @ns.route('/query/g2d')
 class BigclamQuery(Resource):
@@ -22,7 +22,7 @@ class BigclamQuery(Resource):
     @ns.doc(model=query_response)
     @ns.expect(bigclam_query_url_parser, validate=False)
     def get(self):
-        """Submit a new query request."""
+        """Genomic aberrations in INPUT genes lead to sensitivity to OUTPUT drugs."""
         log.info("Initiating query")
         results = run_bigclam_g2d_query(request.values.to_dict())
         log.info("Query submission finished")
@@ -38,7 +38,7 @@ class BigclamQuery(Resource):
     @ns.doc(model=query_response)
     @ns.expect(bigclam_query_request)
     def post(self):
-        """Submit a new query request."""
+        """ Genomic aberrations in INPUT genes lead to sensitivity to OUTPUT drugs"""
         results = run_bigclam_g2d_query(request.json)
         if results['status'] == 'error':
             log.debug("Error in query %s" % (results))
@@ -54,7 +54,7 @@ class BigclamQuery(Resource):
     @ns.doc(model=query_response)
     @ns.expect(bigclam_query_url_parser, validate=False)
     def get(self):
-        """Submit a new query request."""
+        """Genomic aberrations in INPUT genes decrease viability upon knockdown of OUTPUT genes"""
         log.info("Initiating query")
         results = run_bigclam_g2g_query(request.values.to_dict())
         log.info("Query submission finished")
@@ -70,7 +70,7 @@ class BigclamQuery(Resource):
     @ns.doc(model=query_response)
     @ns.expect(bigclam_query_request)
     def post(self):
-        """Submit a new query request."""
+        """Genomic aberrations in INPUT genes decrease viability upon knockdown of OUTPUT genes"""
         results = run_bigclam_g2g_query(request.json)
         if results['status'] == 'error':
             log.debug("Error in query %s" % (results))

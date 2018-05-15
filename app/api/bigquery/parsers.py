@@ -81,7 +81,31 @@ The maximum number of rows to return.
 **Default**: 10000
 """ )
 
-
+# bigclam
 bigclam_query_url_parser = reqparse.RequestParser() 
 bigclam_query_url_parser.add_argument('ids', help="""A comma delimited list of HGNC gene ids to select.""")
 
+
+# biggim lite
+bglite_query_url_parser = reqparse.RequestParser() 
+bglite_query_url_parser.add_argument('ids', help="""A comma delimited list of entrez gene ids to select
+**Default**: all genes.
+
+**Example**:"5111,6996,57697,6815,889,7112,2176,1019,5888,5706"
+        """) 
+bglite_query_url_parser.add_argument('tissue', help="""tissue to select from""") 
+bglite_query_url_parser.add_argument('minR', help="""The minimum r value to select""") 
+bglite_query_url_parser.add_argument('limit', help="""
+The maximum number of rows to return.
+
+
+**Default**: 10000
+""" )
+query_url_parser.add_argument('table', help="""
+The table to select from.
+
+Available tables are provided by  `/api/metadata/tables`.
+
+**Default**: %s
+""" % settings.BIGQUERY_DEFAULT_TABLE
+)

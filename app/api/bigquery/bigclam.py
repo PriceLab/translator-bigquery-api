@@ -13,15 +13,25 @@ glogger = logging.getLogger()
 
 
 class BCQueryBuilder:
-    def __init__(self, genes=[], query_type=None):
+    def __init__(self, genes=[], query_type=None, limit=100):
         self._genes = genes
         self._preparsing_errors = []
         self._query_type = query_type
+        self._limit = limit
 
     def validate_query(self):
+        iq = self.invalid_query_type()
         ig = self.invalid_genes()
-        errors = self._preparsing_errors + ig
+        il = self.invalid_limit()
+        errors = self._preparsing_errors + ig + il
         return errors
+
+    def invalid_limit(self):
+        try:
+            int(self._limit)
+        except ValueError:
+            return ["%s is an invalid limit" % (str(self._limit),)]
+        return []
 
     def invalid_genes(self):
         bad_genes = []
@@ -46,6 +56,8 @@ class BCQueryBuilder:
         args = {}
         if 'ids' in rj:
             args['genes'] = parse_list(rj['ids'])
+        if 'limit' in rj:
+            args['limit'] = rj['limit']
         args['query_type'] = query_type
 
         glogger.debug("Args object.[%s]" % (str(args),))
@@ -56,9 +68,8 @@ class BCQueryBuilder:
         return self._genes
 
     def generate_query(self):
-        glogger.warning(self.base_query)
-        glogger.warning(self.genes_subquery)
-        return self.base_query % self.genes_subquery
+        glogger.debug( self.base_query % (self.genes_subquery, int(self._limit) ) )
+        return self.base_query % (self.genes_subquery, int(self._limit))
 
     @property
     def genes_subquery(self):
@@ -85,7 +96,7 @@ WITH
   WHERE
     HGNC_gene_symbol IN (
     SELECT
-      gene_symbol
+      * 
     FROM
       SOURCE_GENES)
     AND (max_CN-min_CN) >= 4.0
@@ -115,7 +126,7 @@ WITH
   SELECT GDSC_cell_line_name, gene_symbol
   FROM cellList_F_t1, UNNEST(s) AS gene_symbol
   WHERE gene_symbol IN (
-SELECT * FROM geneList) ),
+SELECT * FROM SOURCE_GENES) ),
   cellList_Var AS (
   SELECT GDSC_cell_line_name, HGNC_gene_symbol
   FROM cellList_V_t1
@@ -224,8 +235,9 @@ SELECT * FROM geneList) ),
 
 SELECT *
 FROM FstatsTable
+WHERE F > 0
 ORDER BY F DESC
-LIMIT 10 """
+LIMIT %i """
 
 
     def gene2drug(self):
@@ -440,14 +452,14 @@ WITH
   FROM
     J2
   WHERE
-    Drug_rank <= 10 )
+    Drug_rank <= %i )
 SELECT
   *
 FROM
   F1
+  WHERE not IS_NAN(Drug_Score)
 ORDER BY
   Drug_Rank ASC
-
 
 """
 

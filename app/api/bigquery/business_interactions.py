@@ -4,6 +4,7 @@ from app import settings
 from app.api.bigquery.querytools import *
 
 from app.api.bigquery.bigclam import *
+from app.api.bigquery.bglite import *
 
 from google.cloud import bigquery
 from google.cloud import storage
@@ -227,6 +228,25 @@ def run_bigclam_g2d_query(request):
     returns an error.
     """
     qb = BCQueryBuilder.from_request(request, 'g2d' )
+    errors = qb.validate_query()
+    if len(errors):
+        return {'status':'error',
+                'message': '\n'.join(errors)}
+    else:
+        query = qb.generate_query()
+        gi = GoogleInterface()
+        request_id = gi.query(query)
+        return {'status':'submitted', 'request_id':request_id}
+
+
+def run_bglite_gt2g_query(request):
+    """
+    Takes a request object and runs a genes+tissue to genes biggim query.
+
+    If successful it returns the request id, if unsuccessful it
+    returns an error.
+    """
+    qb = BGLiteQueryBuilder.from_request(request)
     errors = qb.validate_query()
     if len(errors):
         return {'status':'error',
