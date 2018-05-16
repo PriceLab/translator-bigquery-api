@@ -13,10 +13,8 @@ from app import settings
 
 log = logging.getLogger(__name__)
 
-ns = api.namespace('interactions', 
-        description="""Mine the interaction profiles of various
-        entities
-        """)
+ns = api.namespace('results', 
+        description="""Retrieve the results of queries """)
 
 @ns.route('/ndex')
 class NDExSubmit(Resource):

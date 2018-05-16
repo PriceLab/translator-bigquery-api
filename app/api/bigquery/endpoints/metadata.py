@@ -117,7 +117,7 @@ class SwaggerSpec(Resource):
         """Return the swagger v2 spec for this API"""
         return api.__schema__, 200
 
-@ns.route("/openapiv3")
+@ns.route("/openapiv3", doc=False)
 class OpenAPISpec(Resource):
     def get(self):
         """Return the OpenAPI v3 spec for this API"""

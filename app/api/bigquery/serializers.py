@@ -215,35 +215,40 @@ tissue_substudy = api.model('TissueSubstudies', {
     })
 
 
-
-bigclam_query_request = api.model('BigClam request',{
-    'ids': fields.String( required=False,
+#BIGCLAM
+bigclam_query_request = api.model('BigCLAMj request',{
+    'ids': fields.String( required=True,
                         example="TCOF1,DDX46,COPE,RIPK1",
-                        description="""A comma delimited list of HGNC gene ids to select.
-
-**Default**: NONE.
+                        description="""A comma delimited list of HGNC gene ids to select..
 """
                         ),
     })
 
-bglite_query_request = api.model('BigGIM lite request',{
+
+#LILGIM
+bglite_query_request = api.model('lilGIM request',{
     'ids': fields.String( required=False,
                         example="5111,6996,57697,6815,889,7112,2176,1019,5888,5706",
                         description="""A comma delimited list of entrez gene ids to select
 
-**Default**: NONE.
+**Required**
 """
                         ),
     'tissue': fields.String(required=False,
         example="urinary_bladder",
-        description="The tissue to select from"),
-    'minR':fields.Float(required=False, example=.5,
-        description="Minimum r value"),
+        description="""The tissue to select from.
+        **Default**: whole_body
+        """,
+        default="whole_body"),
+    'minR':fields.Float(required=False, example=.3,
+        description="""Minimum absolute Spearman r value
+        """, 
+        default=.3),
     'limit': fields.Integer(description="""
 The maximum number of rows to return.
 
-**Default**: 10000
-""", required=False, example=10000
+**Default**: 1000
+""", required=False, example=10000, default=1000
         ),
     })
 
