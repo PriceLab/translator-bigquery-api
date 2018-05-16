@@ -10,17 +10,21 @@ from app.api.bigquery.parsers import query_url_parser
 from app.api.restplus import api
 from app.database.models import TestModel 
 from app import settings
+from app.api.bigquery.endpoints.bglite import ns as lilgim 
 
+from app.api.bigquery.endpoints.biggim import ns as biggim 
+from app.api.bigquery.endpoints.bigclam import ns as bigclam 
 log = logging.getLogger(__name__)
 
 ns = api.namespace('results', 
-        description="""Retrieve the results of queries """)
+        description="""Retrieve (or send to NDEX) the results of queries """)
 
 @ns.route('/ndex')
 class NDExSubmit(Resource):
     @ns.doc(model=ndex_response)
     @ns.expect(ndex_request)
     def post(self):
+        """Push a query result to NDEX"""
         log.info("%s" % (str(request.json),))
         response = ndex(request.json)
         code = 200 if response['status'] == 'complete' else 404
@@ -31,6 +35,7 @@ class NDExSubmit(Resource):
 class NDExSubmit(Resource):
     @ns.doc(model=ndex_response)
     def get(self, request_id):
+        """Push a query result to NDEX"""
         log.info("%s" % (str(request.json),))
         r = {'request_id': request_id}
         response = ndex(r)
@@ -38,9 +43,21 @@ class NDExSubmit(Resource):
         return response, code
 
 @ns.doc(params={'request_id': 'The request id for a query'})
-@ns.route('/query/status/<string:request_id>')
+@lilgim.doc(params={'request_id': 'The request id for a query'})
+@biggim.doc(params={'request_id': 'The request id for a query'})
+@bigclam.doc(params={'request_id': 'The request id for a query'})
+@ns.route('/status/<string:request_id>')
+@lilgim.route('/status/<string:request_id>')
+@biggim.route('/status/<string:request_id>')
+@bigclam.route('/status/<string:request_id>')
 class InteractionsStatus(Resource):
     @ns.doc( model=query_status_response, 
+            responses={'200':'OK', '404': 'Request id not found'})
+    @lilgim.doc( model=query_status_response, 
+            responses={'200':'OK', '404': 'Request id not found'})
+    @biggim.doc( model=query_status_response, 
+            responses={'200':'OK', '404': 'Request id not found'})
+    @bigclam.doc( model=query_status_response, 
             responses={'200':'OK', '404': 'Request id not found'})
     def get(self, request_id):
         """Gets the status of a query request"""
@@ -50,34 +67,3 @@ class InteractionsStatus(Resource):
         else:
             return result, 200
 
-@ns.route('/query')
-class InteractionsQuery(Resource):
-    @ns.response(400, "Bad query request.")
-    @ns.response(200, "OK")
-    @ns.doc(model=query_response)
-    @ns.expect(query_url_parser, validate=False)
-    def get(self):
-        """Submit a new query request."""
-        log.info("Initiating query")
-        results = run_query(request.values.to_dict())
-        log.info("Query submission finished")
-        if results['status'] == 'error':
-            log.debug("Error in query %s" % (results))
-            return results, 400
-        else:
-            log.debug("Valid request %s" % (results))
-            return results, 200
-
-    @ns.response(400, "Bad query request.")
-    @ns.response(200, "OK")
-    @ns.doc(model=query_response)
-    @ns.expect(query_request)
-    def post(self):
-        """Submit a new query request."""
-        results = run_query(request.json)
-        if results['status'] == 'error':
-            log.debug("Error in query %s" % (results))
-            return results, 400
-        else:
-            log.debug("Valid request %s" % (results))
-            return results, 200

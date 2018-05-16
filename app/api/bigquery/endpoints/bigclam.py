@@ -13,9 +13,9 @@ from app import settings
 log = logging.getLogger(__name__)
 
 ns = api.namespace('bigclam', 
-        description="""Genomic aberrations""")
+        description="""Associations between genomic aberrations, gene knockdowns and drug response in cell lines.""")
 
-@ns.route('/query/g2d')
+@ns.route('/g2d/query')
 class BigclamQuery(Resource):
     @ns.response(400, "Bad query request.")
     @ns.response(200, "OK")
@@ -47,7 +47,7 @@ class BigclamQuery(Resource):
             log.debug("Valid request %s" % (results))
             return results, 200
 
-@ns.route('/query/g2g')
+@ns.route('/g2g/query')
 class BigclamQuery(Resource):
     @ns.response(400, "Bad query request.")
     @ns.response(200, "OK")

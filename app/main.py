@@ -6,10 +6,11 @@ sys.path.append('/')
 
 from flask import Flask, Blueprint
 from app import settings
-from app.api.bigquery.endpoints.interactions import ns as interactions
-from app.api.bigquery.endpoints.metadata import ns as metadata
+from app.api.bigquery.endpoints.biggim import ns as biggim
 from app.api.bigquery.endpoints.bigclam import ns as bigclam
 from app.api.bigquery.endpoints.bglite import ns as bglite 
+from app.api.bigquery.endpoints.interactions import ns as interactions
+from app.api.bigquery.endpoints.metadata import ns as metadata
 from app.api.restplus import api
 from app.database import db
 
@@ -39,6 +40,7 @@ def initialize_app(app):
     configure_app(app)
     blueprint = Blueprint('api', __name__, url_prefix='/api')
     api.init_app(blueprint)
+    api.add_namespace(biggim)
     api.add_namespace(bglite)
     api.add_namespace(bigclam)
     api.add_namespace(interactions)
