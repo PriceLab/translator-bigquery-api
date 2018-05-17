@@ -106,6 +106,7 @@ class GoogleInterface:
 
     def query(self, query, bucket_name=BUCKET):
         glogger.debug("Running query")
+        glogger.debug(query)
         request_id = str(uuid.uuid4())
         query_job = self.bq_client.run_async_query(self.get_query_job_id(request_id), query)
         query_job.use_legacy_sql = False
@@ -316,7 +317,6 @@ class QueryBuilder:
 
         LIMIT = "LIMIT %i" % (int(self._limit),)
         query = '\n'.join([SELECT, FROM, WHERE, LIMIT])
-        glogger.debug("Generated query [%s]" % (query))
         return query
 
     def get_table(self):

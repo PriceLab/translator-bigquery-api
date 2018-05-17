@@ -240,10 +240,6 @@ bglite_query_request = api.model('lilGIM request',{
         **Default**: whole_body
         """,
         default="whole_body"),
-    'minR':fields.Float(required=False, example=.3,
-        description="""Minimum absolute Spearman r value
-        """, 
-        default=.3),
     'limit': fields.Integer(description="""
 The maximum number of rows to return.
 

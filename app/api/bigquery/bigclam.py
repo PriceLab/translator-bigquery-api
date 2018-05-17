@@ -67,9 +67,17 @@ class BCQueryBuilder:
     def genes(self):
         return self._genes
 
+    def strGlist(self):
+        x = ["'%s'" % genes for genes in self.genes]
+        return ','.join(x)
+
     def generate_query(self):
-        glogger.debug( self.base_query % (self.genes_subquery, int(self._limit) ) )
-        return self.base_query % (self.genes_subquery, int(self._limit))
+        if self._query_type == 'g2d':
+            glist = self.strGlist()
+            return self.base_query % (glist,glist, int(self._limit))
+        else:
+            glist = self.strGlist()
+            return self.base_query % (glist,glist,glist, int(self._limit))
 
     @property
     def genes_subquery(self):
@@ -87,18 +95,13 @@ class BCQueryBuilder:
     def gene2gene(self):
         return """
 WITH
-  SOURCE_GENES AS (%s),
   cellList_CN AS (
   SELECT
     Cell_Line_Name AS GDSC_cell_line_name, HGNC_gene_symbol
   FROM
     `isb-cgc-04-0002.GDSC_v0.Copy_Number_Variation`
   WHERE
-    HGNC_gene_symbol IN (
-    SELECT
-      * 
-    FROM
-      SOURCE_GENES)
+    HGNC_gene_symbol IN (%s)
     AND (max_CN-min_CN) >= 4.0
   GROUP BY 1, 2 ),
 
@@ -108,11 +111,7 @@ WITH
   FROM
     `isb-cgc-04-0002.GDSC_v0.WES_variants`
   WHERE
-    HGNC_gene_symbol IN (
-    SELECT
-      *
-    FROM
-      SOURCE_GENES)
+    HGNC_gene_symbol IN (%s)
   GROUP BY 1, 2 ),
 
   cellList_F_t1 AS (
@@ -125,8 +124,7 @@ WITH
 
   SELECT GDSC_cell_line_name, gene_symbol
   FROM cellList_F_t1, UNNEST(s) AS gene_symbol
-  WHERE gene_symbol IN (
-SELECT * FROM SOURCE_GENES) ),
+  WHERE gene_symbol IN (%s) ),
   cellList_Var AS (
   SELECT GDSC_cell_line_name, HGNC_gene_symbol
   FROM cellList_V_t1
@@ -258,7 +256,6 @@ WITH
   -- interim result CN_t2 contains just 11 rows: 11 distinct cell-lines,
   -- each of which has significant CN variation across one of our genes of interest
   --
-  SOURCE_GENES AS (%s),
   CN_t1 AS (
   SELECT
     Cell_Line_Name,
@@ -267,11 +264,7 @@ WITH
   FROM
     `isb-cgc-04-0002.GDSC_v0.Copy_Number_Variation`
   WHERE
-    HGNC_gene_symbol IN (
-    SELECT
-      *
-    FROM
-      SOURCE_GENES   )
+    HGNC_gene_symbol IN (%s)
   GROUP BY
     1,
     2,
@@ -300,11 +293,7 @@ WITH
   FROM
     `isb-cgc-04-0002.GDSC_v0.WES_variants`
   WHERE
-    HGNC_gene_symbol IN (
-    SELECT
-      *
-    FROM
-      SOURCE_GENES )
+    HGNC_gene_symbol IN (%s)
   GROUP BY
     1,
     2),

@@ -104,12 +104,6 @@ See `/metadata/tissue` for options.
 
 **Default**: whole_body
         """, default='whole_body') 
-bglite_query_url_parser.add_argument('minR', help="""The minimum r value to select.
-        
-**Default**: 0.3
-        """,
-        default=0.3
-        ) 
 bglite_query_url_parser.add_argument('limit', help="""
 The maximum number of rows to return.
 

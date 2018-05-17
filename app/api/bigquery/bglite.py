@@ -63,7 +63,6 @@ class BGLiteQueryBuilder(QueryBuilder):
         columns = []
         if st:
             for s in st:
-                glogger.debug("ssid %s" % (s.substudy_id))
                 ss = Substudy.query.get(s.substudy_id)
                 for c in ss.columns:
                     if c.table.name == self._table and c.interactions_type in [spear]:
@@ -86,43 +85,49 @@ class BGLiteQueryBuilder(QueryBuilder):
         gsel = ' OR '.join([gtmp % (g,g) for g in geneList])
         #r value selection
         ftmp = '(%s IS NOT null AND (%s > %f OR %s < %f))'
-        rsel = ' AND '.join([ftmp % (f,f,float(minR), f, -1*float(minR) )for f in pickCol])
+        rsel = ' OR '.join([ftmp % (f,f,float(minR), f, -1*float(minR) )for f in pickCol])
         # table name
         ptable = "%s.%s.%s" % (self._project, self._dataset, self._table)
 
 
-        absSum = '+'.join(["ABS(%s)" % x for x in pickCol])
+        Sum = '+'.join(['%s' % x for x in pickCol])
+        N = '+'.join(["IF(%s IS NULL, 0, 1)" % x for x in pickCol])
+        ave = "(%s)/(%s)" % (Sum, N)
+
         ## we start with interm table t1 where we extract the genes and
         ## tissues of interest, while also thresholding on the correlation
         ## value
         t1 = """
         SELECT GPID, Gene1, Gene2, GREATEST(%s) AS maxCorr, 
-            LEAST(%s) AS minCorr, (%s) as sumCorr, %s
+            LEAST(%s) AS minCorr, 
+            %s as aveCorr 
+            
         FROM `%s` 
-        WHERE (%s) AND (%s)
-        """ % (clist, clist, absSum, clist, ptable, gsel, rsel)
+        WHERE (%s) 
+        """ % (clist, clist, ave, ptable, gsel)
 
         j1 = """
-        SELECT Gene1, b.Approved_Symbol AS Symbol1, Gene2, maxCorr, minCorr, sumCorr, %s
+        SELECT Gene1, b.Approved_Symbol AS Symbol1, Gene2, maxCorr, minCorr, aveCorr
         FROM t1 a JOIN `isb-cgc.genome_reference.genenames_mapping` b 
-            ON a.Gene1=CAST(b.Entrez_Gene_ID AS INT64)""" % (clist,)
+            ON a.Gene1=CAST(b.Entrez_Gene_ID AS INT64)"""# % (clist,)
 
         j2 = """
-        SELECT Gene1, Symbol1, Gene2, b.Approved_Symbol AS Symbol2, maxCorr, minCorr, sumCorr, %s
+        SELECT Gene1, Symbol1, Gene2, b.Approved_Symbol AS Symbol2, maxCorr, minCorr, aveCorr
         FROM j1 a JOIN `isb-cgc.genome_reference.genenames_mapping` b 
             ON a.Gene2=CAST(b.Entrez_Gene_ID AS INT64)  
-        """ % (clist,)
+        """# % (clist,)
 
         q  = """
         WITH 
         t1 AS (%s),
         j1 AS (%s),
         j2 AS (%s)
-        SELECT Gene1, Symbol1, Gene2, Symbol2, maxCorr, minCorr, sumCorr, %s
-        FROM j2 
-        ORDER BY ABS(sumCorr) DESC
+        SELECT Gene1, Symbol1, Gene2, Symbol2, maxCorr, minCorr, aveCorr
+        FROM j2
+        WHERE not IS_NAN(maxCorr)
+        ORDER BY ABS(aveCorr) DESC
         LIMIT %d
-        """ % (t1, j1, j2, clist, int(maxN))
+        """ % (t1, j1, j2, int(maxN))
         glogger.debug("Query [%s]" % (q,))
         return ( q )
 
