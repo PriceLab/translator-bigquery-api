@@ -80,6 +80,13 @@ The maximum number of rows to return.
 
 **Default**: 10000
 """ )
+query_url_parser.add_argument('average_columns', help="""
+The maximum number of rows to return.
+
+
+**Default**: false
+""" )
+
 
 # bigclam
 bigclam_query_url_parser = reqparse.RequestParser() 
