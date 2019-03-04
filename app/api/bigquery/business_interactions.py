@@ -167,10 +167,13 @@ def get_request_status(request_id):
             result['rows'] = qr.total_rows
             result['processed_data'] = convert_size(qr.total_bytes_processed)
             total_file_size = 0
+            glogger.debug("Calculating size")
             for b in gi.list_blobs(prefix=request_id):
                 total_file_size += b.size
+            glogger.debug("Converting size")
             result['size'] = convert_size(total_file_size)
             #glogger.debug("rows: %s" % (tbl.reload().num_rows,))
+            glogger.debug("Getting URLs")
             result['request_uri'] = gi.get_urls( request_id )
             result['status'] = 'complete'
     elif query_job.errors is not None:

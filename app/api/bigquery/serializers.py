@@ -56,6 +56,12 @@ The type of join made on restrictions.
 **Default**: intersect
 """, required=False, example='intersect', enum=['intersect','union']
         ),
+    'average_columns': fields.Boolean(description="""Return average over all columns as `mean`.""",
+            required=False,
+            example=False,
+            default=False
+     ),
+
     'limit': fields.Integer(description="""
 The maximum number of rows to return.
 

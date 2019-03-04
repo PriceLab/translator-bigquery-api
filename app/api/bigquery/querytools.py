@@ -146,14 +146,21 @@ class GoogleInterface:
         return my_blobs
 
     def get_extract_job(self, request_id):
-        ej = [j for j in self.bq_client.list_jobs() if j.name.find(request_id) > -1 and j.name.find('ej') > -1]
-        jobs = sorted(ej, key=lambda x: x.name)
-        return jobs[-1]
+        # TODO: improve this. it was really slowing things down
+        # I made a bandaid fix here
+        # we should upgrade the api and restrict the listjob query
+        # but for now this should speed things up
+        for j in self.bq_client.list_jobs():
+            if j.name.find(request_id) > -1 and j.name.find('ej') > -1:
+                return j
+        return None
 
     def get_query_job(self, request_id):
-        ej = [j for j in self.bq_client.list_jobs() if j.name.find(request_id) > -1 and j.name.find('bq') > -1]
-        jobs = sorted(ej, key=lambda x: x.name)
-        return jobs[-1]
+        ## See above for notes. This should be updated
+        for j in self.bq_client.list_jobs(): 
+            if j.name.find(request_id) > -1 and j.name.find('bq') > -1:
+                return j
+        return None
 
     def get_job(self, job_id):
         for j in self.bq_client.list_jobs():
@@ -162,13 +169,19 @@ class GoogleInterface:
         return None
 
     def get_urls(self, request_id):
+        glogger.debug("Getting extract_job")
         job = self.get_extract_job(request_id)
+        glogger.debug("Got extract_job")
         if job is None:
             glogger.debug("No job for %s" % (request_id, ))
             raise Exception("No such job.")
         if job.state == u'DONE' and job.errors is None:
+            glogger.debug("Listing blobs")
             output_files = self.list_blobs(prefix=request_id)
-            map(lambda x: x.make_public(), output_files)
+            glogger.debug("Making blobs public")
+            for of in output_files:
+                glogger.debug("Making %s public" % (of))
+                of.make_public()
             glogger.debug("Getting urls for extract job %s" % job.name)
             return map(lambda x: x.public_url, output_files)
         elif job.errors is not None:
@@ -188,6 +201,7 @@ class QueryBuilder:
             restriction_bool=[],
             restriction_join='intersect',
             limit=10000,
+            average_columns=False,
             error_messages=[]):
         self._project = settings.BIGQUERY_PROJECT
         self._dataset = settings.BIGQUERY_DATASET
@@ -199,6 +213,7 @@ class QueryBuilder:
         self._restriction_lt = restriction_lt
         self._restriction_join = restriction_join
         self._restriction_bool = restriction_bool
+        self._average_columns = average_columns
         self._limit = limit
         self._preparsing_errors = error_messages
 
@@ -276,7 +291,15 @@ class QueryBuilder:
     def generate_query(self):
         sbase = ["GPID", "Gene1", "Gene2"]
         if len(self._columns):
-            SELECT = 'SELECT ' + ', '.join(sbase + self._columns)
+            if not self._average_columns:
+                SELECT = 'SELECT ' + ', '.join(sbase + self._columns)
+            else:
+                pickCol = self._columns
+                Sum = '+'.join(['%s' % x for x in pickCol])
+                N = '+'.join(["IF(%s IS NULL, 0, 1)" % x for x in pickCol])
+                ave = "(%s)/(%s)" % (Sum, N)
+                SELECT = 'SELECT ' + ', '.join(sbase)
+                SELECT += ', %s as mean' % (ave,)
         else:
             SELECT = 'SELECT * '
         FROM = "FROM `%s.%s.%s`" % (self._project, self._dataset, self._table)
@@ -317,6 +340,8 @@ class QueryBuilder:
 
         LIMIT = "LIMIT %i" % (int(self._limit),)
         query = '\n'.join([SELECT, FROM, WHERE, LIMIT])
+       
+        glogger.debug("Query:\n%s" % (query,))
         return query
 
     def get_table(self):
@@ -397,9 +422,14 @@ class QueryBuilder:
             except:
                 error_messages += ['Unparseable restriction_bool [%s]' % (rj['restriction_bool'],)]
         if 'restriction_join' in rj:
-                args['restriction_join'] = rj['restriction_join']
+            args['restriction_join'] = rj['restriction_join']
         if 'limit' in rj:
-                args['limit'] = rj['limit']
+            args['limit'] = rj['limit']
+        if 'average_columns' in rj:
+            if rj['average_columns'] in ['false', 'False', 'F', 0]:
+                args['average_columns'] = False
+            else:
+                args['average_columns'] = bool(rj['average_columns'])
         if len(error_messages) > 0:
             args['error_messages'] = error_messages
         glogger.debug("Args object.[%s]" % (str(args),))
