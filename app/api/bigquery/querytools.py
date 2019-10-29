@@ -117,7 +117,7 @@ class GoogleInterface:
             table = ds.table(name=self.get_temp_table_name(request_id))
             table.expires = datetime.now() + timedelta(hours=1) 
             table.create()
-            query_job.create_disposition = 'WRITE_TRUNCATE'
+            query_job.write_disposition = 'WRITE_TRUNCATE'
             query_job.destination_table = table
         query_job.begin()
 
