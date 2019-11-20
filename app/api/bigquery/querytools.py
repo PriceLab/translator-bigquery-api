@@ -82,7 +82,7 @@ class GoogleInterface:
     """
     def __init__(self, key=KEY):
         self._key = key
-        self._allow_big_results = True 
+        self._allow_big_results = True
 
     @property
     def bq_client(self):
@@ -106,7 +106,6 @@ class GoogleInterface:
 
     def query(self, query, bucket_name=BUCKET):
         glogger.debug("Running query")
-        glogger.debug(query)
         request_id = str(uuid.uuid4())
         query_job = self.bq_client.run_async_query(self.get_query_job_id(request_id), query)
         query_job.use_legacy_sql = False
@@ -115,7 +114,7 @@ class GoogleInterface:
             glogger.debug("Creating temp table for large results")
             ds =  self.bq_client.dataset(settings.BIGQUERY_DATASET)
             table = ds.table(name=self.get_temp_table_name(request_id))
-            table.expires = datetime.now() + timedelta(hours=1) 
+            table.expires = datetime.now() + timedelta(hours=1)
             table.create()
             query_job.write_disposition = 'WRITE_TRUNCATE'
             query_job.destination_table = table
@@ -157,7 +156,7 @@ class GoogleInterface:
 
     def get_query_job(self, request_id):
         ## See above for notes. This should be updated
-        for j in self.bq_client.list_jobs(): 
+        for j in self.bq_client.list_jobs():
             if j.name.find(request_id) > -1 and j.name.find('bq') > -1:
                 return j
         return None
@@ -340,7 +339,7 @@ class QueryBuilder:
 
         LIMIT = "LIMIT %i" % (int(self._limit),)
         query = '\n'.join([SELECT, FROM, WHERE, LIMIT])
-       
+
         glogger.debug("Query:\n%s" % (query,))
         return query
 
@@ -383,18 +382,55 @@ class QueryBuilder:
 
     @classmethod
     def from_request(cls, request):
-        """Generates QueryGenerator object from request"""
+        """Generates QueryGenerator object from request
+
+        Parameters
+        ----------
+        request (dict): Arguments to for query.
+                        Includes restrictions on genes, columns, table, coefficients, p-values, rows, etc.
+
+        Returns
+        -------
+        None
+
+        """
         def parse_list(gstr):
+            """ Parse a string representation of a list of genes
+
+            Parameters
+            ----------
+            gstr (str): string representation of a list with no end brackets separated by commas.
+
+            Returns
+            -------
+            list of string
+            """
             return map(lambda x: x.strip(), gstr.split(','))
 
         def parse_restrictions(rstr):
+            """ Parse a list of restrictions.
+                Restrictions must be presented in pairs of (restriction_type, threshold_value)
+
+            Parameters
+            ----------
+            rstr (str): string representation of list of restriction pairs
+
+            Returns
+            -------
+            list of tuples where each tuple is a pair of restriction type and threshold
+
+            """
             rlist = parse_list(rstr)
+            restrictions = []
+
+            # check to make sure length of restrictions are pairs of (restriction_type, threshold)
             if len(rlist) < 2 or len(rlist) % 2 != 0:
                 raise Exception("Bad restriction")
-            restrictions = []
+
             for i in range(len(rlist)/2):
                 restrictions.append((rlist[2*i], rlist[2*i+1]))
             return restrictions
+
         error_messages = []
         rj = request
         args = {}
