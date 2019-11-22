@@ -217,24 +217,31 @@ class QueryBuilder:
         self._preparsing_errors = error_messages
 
     def invalid_table(self):
+        ''' Validate table. If invalid, return the name of the table. '''
         if not self.get_table().exists():
             return ["Bad table: %s" % (self._table)]
         else:
             return []
 
     def invalid_columns(self):
+        ''' Validate columns. Return invalid columns, if any. '''
         tbl_columns = self.get_column_names()
         missing_columns = ["Bad column: %s" % c for c in self._columns if c not in tbl_columns]
         return missing_columns
 
     def invalid_limit(self):
+        ''' Validate row limit, checking if it is an integer and if integer is greater than 0. '''
         try:
             i = int(self._limit)
-            return []
+            if i >= 0:
+                return []
+            else:
+                return ["Bad limit: [%s]" % (self._limit,)]
         except:
             return ["Bad limit: [%s]" % (self._limit,)]
 
     def invalid_genes(self):
+        ''' Validate genes, checking if they are integers. '''
         bad_genes = []
         for g in self._genes_from:
             try:
@@ -252,6 +259,7 @@ class QueryBuilder:
             return []
 
     def invalid_restrictions(self):
+        ''' Validate restrictions by checking if the column is in the table and if the threshold value is a float '''
         invalid_restriction = []
         tbl_columns = self.get_column_names()
         for column, value in self._restriction_gt:
@@ -278,7 +286,22 @@ class QueryBuilder:
         return invalid_restriction
 
     def validate_query(self):
+        ''' Validate each argument of the query to ensure approriate genes, tables,
+                columns, strictions, and limits are requested
+
+        Parameters
+        ----------
+        self
+
+        Returns
+        -------
+        errors (list): list of errors, if any
+        '''
+        # First check if table is valid. If not, other checks would fail
         it = self.invalid_table()
+        if len(it) > 0:
+            return it
+
         ic = self.invalid_columns()
         ig = self.invalid_genes()
         ir = self.invalid_restrictions()
@@ -462,10 +485,12 @@ class QueryBuilder:
         if 'limit' in rj:
             args['limit'] = rj['limit']
         if 'average_columns' in rj:
-            if rj['average_columns'] in ['false', 'False', 'F', 0]:
+            if rj['average_columns'] in ['false', 'False', 'FALSE','F', 0]:
                 args['average_columns'] = False
+            elif rj['average_columns'] in ['true', 'True', 'TRUE','T', 1]:
+                args['average_columns'] = True
             else:
-                args['average_columns'] = bool(rj['average_columns'])
+                error_messages += ['Unparseable average_columns [%s]' % (rj['average_columns'],)]
         if len(error_messages) > 0:
             args['error_messages'] = error_messages
         glogger.debug("Args object.[%s]" % (str(args),))
