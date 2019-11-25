@@ -1,0 +1,11 @@
+version: "2.1"
+services:
+  biggim:
+      build: "."
+      image: "pricelab/translator-bigquery-api"
+      ports:
+        - 80
+        - 443
+      volumes:
+        - ./cred:/cred
+        - ./app:/app

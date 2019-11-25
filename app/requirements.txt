@@ -1,0 +1,8 @@
+flask-restplus
+Flask-SQLAlchemy
+pandas
+markdown
+flask-cors
+google-cloud-bigquery
+google-cloud-storage
+ndex2
