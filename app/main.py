@@ -1,8 +1,8 @@
 import logging.config
+logging.config.fileConfig('logging.conf')
+
 import sys
 sys.path.append('/')
-
-
 
 from flask import Flask, Blueprint
 from app import settings
@@ -19,9 +19,8 @@ from app.database import db
 
 
 app = Flask(__name__)
-logging.config.fileConfig('logging.conf')
-log = logging.getLogger(__name__)
-
+app.logger.setLevel(logging.DEBUG)
+app.logger.info("Starting flask")
 
 def configure_app(flask_app):
     flask_app.config['SERVER_NAME'] = settings.FLASK_SERVER_NAME
@@ -36,25 +35,30 @@ def configure_app(flask_app):
 
 
 def initialize_app(app):
-    log.info("Test log")
+    app.logger.info("Starting Initialization")
     configure_app(app)
+    app.logger.info("Configuration Finished")
     blueprint = Blueprint('api', __name__, url_prefix='/api')
+    app.logger.info("Blueprint loaded")
     api.init_app(blueprint)
     api.add_namespace(biggim)
     api.add_namespace(bglite)
     api.add_namespace(bigclam)
     api.add_namespace(interactions)
     api.add_namespace(metadata)
+    app.logger.info("Finished adding namespaces")
     app.register_blueprint(blueprint)
+    app.logger.info("Finished registering blueprint")
     db.init_app(app)
-    log.info("finished initialize")
+    app.logger.info("finished initialize")
 
 initialize_app(app)
 
 @app.route("/")
 def hello():
+    app.logger.info("returning BigGIM API Link")
     return """<a href="http://biggim.ncats.io/api/">http://biggim.ncats.io/api/</a>"""
 
 if __name__ == '__main__':
-    log.info('>>>>> Starting development server at http://{}/api/ <<<<<'.format(app.config['SERVER_NAME']))
+    app.logger.info('>>>>> Starting development server at http://{}/api/ <<<<<'.format(app.config['SERVER_NAME']))
     app.run(host='0.0.0.0', debug=True, port=80)

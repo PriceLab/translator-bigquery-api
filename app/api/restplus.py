@@ -6,7 +6,7 @@ from app import settings
 from sqlalchemy.orm.exc import NoResultFound
 
 log = logging.getLogger(__name__)
-
+log.setLevel(logging.DEBUG)
 log.debug("In restplus")
 api = Api(version='2.0', title='Big GIM and Big CLAM',
         description="""**Big GIM** (Gene Interaction Miner) is an **NCATS Translator Knowledge Source** that contains function interaction data for all pairs of genes. Functional interaction data are available from four different sources: 1) tissue-specific gene expression correlations from healthy tissue samples (GTEx), 2) tissue-specific gene expression correlations from cancer samples (TCGA), 3) tissue-specific probabilities of function interaction (GIANT), and 4) direct interactions (BioGRID). These data are stored as a Google BigQuery tables enabling fast access and real-time association analysis.
