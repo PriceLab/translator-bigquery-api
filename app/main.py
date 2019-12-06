@@ -61,4 +61,4 @@ def hello():
 
 if __name__ == '__main__':
     app.logger.info('>>>>> Starting development server at http://{}/api/ <<<<<'.format(app.config['SERVER_NAME']))
-    app.run(host='0.0.0.0', debug=True, port=80)
+    app.run(host='0.0.0.0', debug=True, port=8080)
