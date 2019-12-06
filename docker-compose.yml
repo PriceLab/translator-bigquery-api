@@ -4,8 +4,9 @@ services:
       build: "."
       image: "pricelab/translator-bigquery-api"
       ports:
-        - 80
-        - 443
+        - "80:80"
+        - "443:443"
+        - "8080:8080"
       volumes:
         - ./cred:/cred
         - ./app:/app
