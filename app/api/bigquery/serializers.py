@@ -33,19 +33,22 @@ Available columns are provided by `/api/metadata/tables/{table_name}/columns`.
                           required=False,
                           example = 'TCGA_GBM_Correlation,TCGA_GBM_Pvalue,GTEx_Brain_Correlation,GTEx_Brain_Pvalue'),
     'restriction_lt': fields.String(description="""
-A list of pairs of values `column name,value` with which to restrict the results of the query to rows where the value of the column is less than the given value.
+A list of pairs of values `column name,value` with which to restrict the results of the query to rows where the value
+of the column is less than the given value.
 """,
     example='TCGA_GBM_Pvalue,1.3, GTEx_Brain_Pvalue,1.3'
     ),
     'restriction_gt': fields.String(description="""
-A list of pairs of values `column name,value` with which to restrict the results of the query to rows where the value of the column is greater than the given value.
+A list of pairs of values `column name,value` with which to restrict the results of the query to rows where the value
+of the column is greater than the given value.
 """,
     required=False,
     example='TCGA_GBM_Correlation,.2, GTEx_Brain_Correlation,.2'
     ),
 
     'restriction_bool': fields.String(description="""
-A list of pairs of values `column name,value` with which to restrict the results of the query to rows where the value of the column is True or False.
+A list of pairs of values `column name,value` with which to restrict the results of the query to rows where the value
+of the column is True or False.
 """,
     required=False,
     example='BioGRID_Interaction,True'

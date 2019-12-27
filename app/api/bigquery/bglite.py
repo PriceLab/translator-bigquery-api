@@ -5,6 +5,13 @@ import logging
 
 glogger = logging.getLogger()
 
+"""
+BGLite = LittleGIM
+LittleGIM specifies a set of defaults
+LittleGIM simplifies the set of returns by averaging across the columns that are the same across multiple datasets
+Returns min, max, and average from the columns by tissue type
+"""
+
 class BGLiteQueryBuilder(QueryBuilder):
     def __init__(self, table=settings.BIGQUERY_DEFAULT_TABLE,
             genes=[], tissue = 'whole_body', minR = 0.3, limit=10000,

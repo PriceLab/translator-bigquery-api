@@ -239,7 +239,15 @@ LIMIT %i """
 
 
     def gene2drug(self):
-        return """
+      """
+      Connects Gene Symbols
+        - To Cell lines via Copy Number Variations
+        - To Cell lines via WES Gene variations
+      Then connects Cell lines to Drug response information
+      Returns a rank of drugs where the drug has the lowest
+      IC50 value in that particular cell-line
+      """
+      return """
 WITH
   --
   -- we query the Copy_Number data in two steps:
