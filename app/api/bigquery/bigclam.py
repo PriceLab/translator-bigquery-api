@@ -23,7 +23,7 @@ class BCQueryBuilder:
         iq = self.invalid_query_type()
         ig = self.invalid_genes()
         il = self.invalid_limit()
-        errors = self._preparsing_errors + ig + il
+        errors = self._preparsing_errors + iq + ig + il
         return errors
 
     def invalid_limit(self):
@@ -35,7 +35,10 @@ class BCQueryBuilder:
 
     def invalid_genes(self):
         bad_genes = []
-        #TODO: check genes
+        # CLAM uses Entrez Gene Symbols, so all digits is not valid
+        for gene in self._genes:
+          if gene.isdigit():
+            bad_genes.append(gene)
         if len(bad_genes):
             return ["Bad gene: %s" % (g) for g in bad_genes]
         else:
