@@ -2,17 +2,17 @@ import logging
 
 from flask import request
 from flask_restplus import Resource
-from app.api.bigquery.business_interactions import get_request_status, run_bigclam_g2g_query, run_bigclam_g2d_query, ndex
-from app.api.bigquery.serializers import bigclam_query_request, query_status_response, query_response, ndex_request, ndex_response
+from app.api.bigquery.business_interactions import run_bigclam_g2g_query, run_bigclam_g2d_query
+from app.api.bigquery.serializers import bigclam_query_request, query_response
 from app.api.bigquery.parsers import bigclam_query_url_parser
 
 from app.api.restplus import api
-from app.database.models import TestModel 
+from app.database.models import TestModel
 from app import settings
 
 log = logging.getLogger(__name__)
 
-ns = api.namespace('bigclam', 
+ns = api.namespace('bigclam',
         description="""Associations between genomic aberrations, gene knockdowns and drug response in cell lines.""")
 
 @ns.route('/g2d/query')

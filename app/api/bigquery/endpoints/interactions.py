@@ -3,20 +3,17 @@ import logging
 
 from flask import request
 from flask_restplus import Resource
-from app.api.bigquery.business_interactions import get_request_status, run_query, ndex
-from app.api.bigquery.serializers import query_request, query_status_response, query_response, ndex_request, ndex_response
-from app.api.bigquery.parsers import query_url_parser
+from app.api.bigquery.business_interactions import get_request_status, ndex
+from app.api.bigquery.serializers import query_status_response, ndex_request, ndex_response
 
 from app.api.restplus import api
-from app.database.models import TestModel 
-from app import settings
-from app.api.bigquery.endpoints.bglite import ns as lilgim 
+from app.api.bigquery.endpoints.bglite import ns as lilgim
 
-from app.api.bigquery.endpoints.biggim import ns as biggim 
-from app.api.bigquery.endpoints.bigclam import ns as bigclam 
+from app.api.bigquery.endpoints.biggim import ns as biggim
+from app.api.bigquery.endpoints.bigclam import ns as bigclam
 log = logging.getLogger(__name__)
 
-ns = api.namespace('results', 
+ns = api.namespace('results',
         description="""Retrieve (or send to NDEX) the results of queries """)
 
 @ns.route('/ndex')
@@ -51,13 +48,13 @@ class NDExSubmit(Resource):
 @biggim.route('/status/<string:request_id>')
 @bigclam.route('/status/<string:request_id>')
 class InteractionsStatus(Resource):
-    @ns.doc( model=query_status_response, 
+    @ns.doc( model=query_status_response,
             responses={'200':'OK', '404': 'Request id not found'})
-    @lilgim.doc( model=query_status_response, 
+    @lilgim.doc( model=query_status_response,
             responses={'200':'OK', '404': 'Request id not found'})
-    @biggim.doc( model=query_status_response, 
+    @biggim.doc( model=query_status_response,
             responses={'200':'OK', '404': 'Request id not found'})
-    @bigclam.doc( model=query_status_response, 
+    @bigclam.doc( model=query_status_response,
             responses={'200':'OK', '404': 'Request id not found'})
     def get(self, request_id):
         """Gets the status of a query request"""

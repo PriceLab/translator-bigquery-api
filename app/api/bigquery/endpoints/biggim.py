@@ -2,17 +2,17 @@ import logging
 
 from flask import request
 from flask_restplus import Resource
-from app.api.bigquery.business_interactions import get_request_status, run_query, ndex
-from app.api.bigquery.serializers import query_request, query_status_response, query_response, ndex_request, ndex_response
+from app.api.bigquery.business_interactions import run_query
+from app.api.bigquery.serializers import query_request, query_response
 from app.api.bigquery.parsers import query_url_parser
 
 from app.api.restplus import api
-from app.database.models import TestModel 
+from app.database.models import TestModel
 from app import settings
 
 log = logging.getLogger(__name__)
 
-ns = api.namespace('biggim', 
+ns = api.namespace('biggim',
         description="""Comprehensive querying of gene to gene interactions under different tissue types.""")
 
 @ns.route('/query')
