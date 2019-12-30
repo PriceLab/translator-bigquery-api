@@ -39,3 +39,34 @@ def step_submit_valid_query(context, query_type, ids):
     }
     bcqb = BCQueryBuilder()
     context.query = BCQueryBuilder.from_request(valid_request, query_type)
+
+### Misc Tests
+
+@then('a SQL separated string is returned for strGlist')
+def step_valid_sql_gene_string(context):
+  genestring = BCQueryBuilder(context.genes).strGlist()
+  expected = "'TCOF1','KLK3'"
+  assert genestring == expected
+
+@then('the "{query_function}" returns the correct SQL')
+def step_valid_query_function_called(context, query_function):
+  qb = BCQueryBuilder(context.genes, context.query_type)
+  print(qb)
+  print(query_function)
+  expected = getattr(qb, query_function)()
+  try:
+    print(qb.__dict__)
+    result = qb.base_query
+  except Exception as e:
+    import traceback
+    print(e)
+    print("found exception",traceback.print_exc())
+  print(result)
+  assert result == expected
+
+@when(u"query_builder call base_query with invalid query_type")
+def step_invalid_query_type_base_query(context):
+  qb = BCQueryBuilder(context.genes, context.query_type)
+  # throws an exception caught by try to step
+  result = qb.base_query
+

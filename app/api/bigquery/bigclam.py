@@ -84,6 +84,7 @@ class BCQueryBuilder:
 
     @property
     def genes_subquery(self):
+        """ Not Used """
         return ' UNION ALL '.join(["SELECT '%s'" % (g,) for g in self.genes])
 
     @property
@@ -93,7 +94,7 @@ class BCQueryBuilder:
         elif self._query_type=='g2g':
             return self.gene2gene()
         else:
-            raise Exception("[%s] is unknown query type")
+            raise Exception("{} is unknown query type".format(self._query_type))
 
     def gene2gene(self):
         return """

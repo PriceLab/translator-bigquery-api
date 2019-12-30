@@ -30,3 +30,23 @@ Feature: Parsing and checking input bigclam query
           | query type |  ids    |
           | g2d        |  TCOF1  |
           | g2g        |  TCOF1  |
+
+    Scenario: User submits a list of genes and gets a string of genes for SQL replacement
+        Given a valid list of genes
+        Then a SQL separated string is returned for strGlist
+
+    Scenario Outline: User quries get correct base queries
+        Given a valid list of genes
+        and a valid query of "<query_type>"
+        Then the "<query_function>" returns the correct SQL
+
+        Examples:
+        | query_type | query_function |
+        | g2g        | gene2gene      |
+        | g2d        | gene2drug      |
+
+    Scenario: User submits an invalid query type to base_query
+        Given a valid list of genes
+        But no query_type
+        When query_builder try to call base_query with invalid query_type
+        Then there should be an exception with value "None is unknown query type"
