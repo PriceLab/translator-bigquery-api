@@ -4,7 +4,7 @@ import logging
 from flask import request
 from flask_restplus import Resource
 from app.api.bigquery.business_interactions import get_request_status, ndex
-from app.api.bigquery.serializers import query_status_response, ndex_request, ndex_response
+from app.api.bigquery.serializers import query_status, query_status_response, ndex_request, ndex_response
 
 from app.api.restplus import api
 from app.api.bigquery.endpoints.bglite import ns as lilgim
@@ -39,10 +39,10 @@ class NDExSubmit(Resource):
         code = 200 if response['status'] == 'complete' else 404
         return response, code
 
-@ns.doc(params={'request_id': 'The request id for a query'})
-@lilgim.doc(params={'request_id': 'The request id for a query'})
-@biggim.doc(params={'request_id': 'The request id for a query'})
-@bigclam.doc(params={'request_id': 'The request id for a query'})
+@ns.doc(query_status)
+@lilgim.doc(query_status)
+@biggim.doc(query_status)
+@bigclam.doc(query_status)
 @ns.route('/status/<string:request_id>')
 @lilgim.route('/status/<string:request_id>')
 @biggim.route('/status/<string:request_id>')

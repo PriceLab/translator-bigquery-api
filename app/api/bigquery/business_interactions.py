@@ -124,6 +124,25 @@ def get_request_status(request_id):
         s = round(size_bytes / p, 2)
         return "%s %s" % (s, size_name[i])
 
+    def validate(request_id):
+        """ All request IDs should be a valid UUID4 """
+        errors = []
+        try:
+            val = uuid.UUID(request_id, version=4)
+            if val.hex == request_id:
+                errors.append("Invalid request_id")
+
+        except ValueError:
+            # If it's a value error, then the string
+            # is not a valid hex code for a UUID.
+            errors.append("Invalid request_id")
+        return errors
+
+    errors = validate(request_id)
+    if len(errors):
+        return {'status':'error',
+                'message': '\n'.join(errors)}
+
     gi = GoogleInterface()
     query_job_id = gi.get_query_job_id(request_id)
     glogger.debug("Searching for %s query job" % (query_job_id,))

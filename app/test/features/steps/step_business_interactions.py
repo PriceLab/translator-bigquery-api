@@ -10,6 +10,10 @@ from app.api.bigquery.business_interactions import get_request_status
 def successful_request(context):
   context.request_id = "77dae546-b1e4-433e-9b47-4de68fe35686"
 
+@given('an invalid request status query for "{request_id}"')
+def invalid_request(context, request_id):
+  context.request_id = request_id
+
 @then('the API returns a complete request status')
 def complete_request_status(context):
   print("context {}".format(context.__dict__))
@@ -37,3 +41,9 @@ def complete_request_status(context):
     print("expected\n {}".format(expected))
     assert result == expected
 
+@then('the request status API returns an error message')
+def request_status_invalid_request_id(context):
+    result = get_request_status(context.request_id)
+    print(result)
+    assert result['status'] == 'error'
+    assert result['message'] == 'Invalid request_id'
