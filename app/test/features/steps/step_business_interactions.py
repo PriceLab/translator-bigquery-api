@@ -5,7 +5,6 @@ from behave import given, when, then
 from mock import patch
 
 from app.api.bigquery.business_interactions import get_request_status
-from app.api.bigquery.querytools import GoogleInterface
 
 @given('a successful request id')
 def successful_request(context):
@@ -26,8 +25,15 @@ def complete_request_status(context):
   }
 
   googleinterface = context.googleinterface
-  with patch('app.api.bigquery.querytools.GoogleInterface') as mock_googleinterface:
-    mock_googleinterface = googleinterface
+  print(googleinterface.get_query_job_results.return_value)
+  with patch('app.api.bigquery.business_interactions.GoogleInterface') as mock_googleinterface:
+    mock_googleinterface().get_query_job_results.return_value = googleinterface.get_query_job_results.return_value
+    mock_googleinterface().get_extract_job.return_value = googleinterface.get_extract_job.return_value
+    mock_googleinterface().get_urls.return_value = googleinterface.get_urls.return_value
+    mock_googleinterface().list_blobs.return_value = googleinterface.list_blobs.return_value
+
     result = get_request_status(context.request_id)
+    print("result \n {}".format(result))
+    print("expected\n {}".format(expected))
     assert result == expected
 

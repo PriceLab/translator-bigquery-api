@@ -1,5 +1,10 @@
 from behave import given, when, then
 from mock import Mock, patch
+from google.cloud.bigquery.query import QueryResults
+from google.cloud.bigquery.client import Client
+
+from app.api.bigquery.querytools import GoogleInterface
+
 
 """
 This is a series of steps that mock the GoogleInterface class to return specific values
@@ -18,12 +23,13 @@ def successful_run_async_query(context):
 def successful_get_query_results(context):
   """ For querytools.py:get_query_job_results """
   if 'googleinterface' in context:
-    print("FOUND MOCK")
+    print("FOUND successful_get_query_results MOCK")
     googleinterface = context.googleinterface
   else:
     googleinterface = Mock()
 
-  googleinterface.get_query_job_results.return_value = {
+  print("mock bq_client?", googleinterface.bq_client)
+  qr = QueryResults.from_api_repr({
     u'kind': u'bigquery#getQueryResultsResponse',
     u'jobReference': {
       u'projectId': u'isb-cgc-04-0010',
@@ -46,19 +52,25 @@ def successful_get_query_results(context):
         {u'type': u'FLOAT', u'name': u'aveCorr', u'mode': u'NULLABLE'}
       ]
     }
-  }
+  }, googleinterface.bq_client)
+  print("successful_query_results {}".format(qr))
+  googleinterface.get_query_job_results.return_value = qr
   context.googleinterface = googleinterface
 
 @when('I receive a successful extract job result')
 def successful_get_list_jobs(context):
   """ For querytools.py get_extract_job"""
   if 'googleinterface' in context:
-    print("FOUND MOCK")
+    print("FOUND successful_get_list_jobs MOCK")
     googleinterface = context.googleinterface
   else:
     googleinterface = Mock()
 
-  googleinterface.get_extract_job.return_value = {
+  print("RETURNING GET EXTRACT JOB")
+  # Uses the current credentials to create a client that can parse the
+  # saved response object into a Job.
+  gi = GoogleInterface()
+  job = gi.bq_client.job_from_resource({
     u'status': {u'state': u'DONE'},
     u'kind': u'bigquery#job',
     u'statistics':
@@ -92,7 +104,36 @@ def successful_get_list_jobs(context):
     },
     u'id': u'isb-cgc-04-0010:US.ej-0-77dae546-b1e4-433e-9b47-4de68fe35686',
     u'user_email': u'translator-bigquery@isb-cgc-04-0010.iam.gserviceaccount.com'
-  }
+  })
+  print("\nJOB IS {}\n".format(job))
+  googleinterface.get_extract_job.return_value = job
+  context.googleinterface = googleinterface
+
+@when('I receive a successful list_blobs result')
+def successful_list_blobs(context):
+  if 'googleinterface' in context:
+    print("FOUND successful_get_urls MOCK")
+    googleinterface = context.googleinterface
+  else:
+    googleinterface = Mock()
+
+  blob = Mock()
+  blob.size = 4260
+  googleinterface.list_blobs.return_value = [blob]
+  context.googleinterface = googleinterface
+
+
+@when('I receive a successful get_urls result')
+def successful_get_urls(context):
+  if 'googleinterface' in context:
+    print("FOUND successful_get_list_jobs MOCK")
+    googleinterface = context.googleinterface
+  else:
+    googleinterface = Mock()
+
+  googleinterface.get_urls.return_value = [
+    "https://storage.googleapis.com/ncats_bigquery_results/77dae546-b1e4-433e-9b47-4de68fe35686000000000000.csv"
+  ]
   context.googleinterface = googleinterface
 
 def successful_get_list_jobs(context):
