@@ -34,3 +34,14 @@ def step_exception_value(context, value):
   print("Looking for this in exception message:", value)
   print("exception message", str(context.exception))
   assert value in str(context.exception)
+
+@then('a json error message is returned')
+def json_error_message(context):
+    assert context.json_response['status'] == 'error'
+    assert context.json_response['message'] is not None
+
+@then('no json error messages are returned')
+def json_error_message(context):
+    assert context.json_response['status'] == 'submitted'
+    assert 'message' not in context.json_response
+    assert context.json_response['request_id'] is not None

@@ -2,7 +2,7 @@ import logging
 
 from flask import request
 from flask_restplus import Resource
-from app.api.bigquery.business_interactions import run_bigclam_g2g_query, run_bigclam_g2d_query
+from app.api.bigquery.bigclam_interactions import run_bigclam_g2g_query, run_bigclam_g2d_query
 from app.api.bigquery.serializers import bigclam_query_request, query_response
 from app.api.bigquery.parsers import bigclam_query_url_parser
 
