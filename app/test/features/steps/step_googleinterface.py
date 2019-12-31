@@ -1,3 +1,4 @@
+import uuid
 from behave import given, when, then
 from mock import Mock, patch
 from google.cloud.bigquery.query import QueryResults
@@ -269,3 +270,16 @@ def successful_storage_results(context):
     u'kind': u'storage#objects'
   }
   context.bucket = mock_bucket
+
+@given('I receive a successful query job submission')
+def successful_query_submission_results(context):
+  """ For bigclam_interactions.py:run_bigclam_g2g_query/run_bigclam_g2d_query """
+  """ Needs to patch GoogleInterface.query to return a UUID4 """
+  if 'googleinterface' in context:
+    print("FOUND successful_query_submission_results MOCK")
+    googleinterface = context.googleinterface
+  else:
+    googleinterface = Mock()
+
+  googleinterface.query.return_value = str(uuid.uuid4())
+  context.googleinterface = googleinterface

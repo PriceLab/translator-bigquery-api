@@ -16,11 +16,17 @@ def invalid_run_bigclam_g2g_query(context):
   json_response = run_bigclam_g2g_query(invalid_request)
   context.json_response = json_response
 
-@given('a valid run_bigclam_g2g_query')
+@when('I run a valid run_bigclam_g2g_query')
 def valid_run_bigclam_g2g_query(context):
   valid_request = {'ids': 'TCOF1'}
-  json_response = run_bigclam_g2g_query(valid_request)
-  context.json_response = json_response
+  googleinterface = context.googleinterface
+  print(googleinterface.query.return_value)
+  with patch('app.api.bigquery.bigclam_interactions.GoogleInterface') as mock_googleinterface:
+    mock_googleinterface().query.return_value = googleinterface.query.return_value
+
+    json_response = run_bigclam_g2g_query(valid_request)
+    print("json_response in valid_run_bigclam_g2g_query", json_response)
+    context.json_response = json_response
 
 @given('a bigclam run_bigclam_g2d_query with invalid request')
 def invalid_run_bigclam_g2d_query(context):
@@ -32,8 +38,14 @@ def invalid_run_bigclam_g2d_query(context):
   json_response = run_bigclam_g2d_query(invalid_request)
   context.json_response = json_response
 
-@given('a valid run_bigclam_g2d_query')
+@when('I run a valid run_bigclam_g2d_query')
 def valid_run_bigclam_g2d_query(context):
   valid_request = {'ids': 'TCOF1'}
-  json_response = run_bigclam_g2d_query(valid_request)
-  context.json_response = json_response
+  googleinterface = context.googleinterface
+  print(googleinterface.query.return_value)
+  with patch('app.api.bigquery.bigclam_interactions.GoogleInterface') as mock_googleinterface:
+    mock_googleinterface().query.return_value = googleinterface.query.return_value
+
+    json_response = run_bigclam_g2d_query(valid_request)
+    print("json_response in valid_run_bigclam_g2d_query", json_response)
+    context.json_response = json_response
