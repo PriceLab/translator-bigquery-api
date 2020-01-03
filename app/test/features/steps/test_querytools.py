@@ -1,5 +1,5 @@
 import sys
-sys.path.append('../../')
+sys.path.append('/')
 
 from behave import *
 from app.api.bigquery.querytools import *
