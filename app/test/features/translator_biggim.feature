@@ -1,10 +1,10 @@
-Feature: Parsing and checking input query
-    Scenario: User submits an empty query
-	   Given an empty query submitted
+Feature: Parsing and checking input request
+    Scenario: User submits an empty request
+	   Given an empty request submitted
        Then no error messages are returned
 
-    Scenario Outline: User submits query containing invalid parameters
-        Given a query with invalid "<argument type>" of "<argument>"
+    Scenario Outline: User submits request containing invalid parameters
+        Given a request with invalid "<argument type>" of "<argument>"
         Then a list of errors is returned
 
         Examples:
@@ -19,6 +19,11 @@ Feature: Parsing and checking input query
           | restriction boolean     |   BioGRID_Inter,None      |
           | average columns         |   None                    |
 
-    Scenario: User submits a valid query
-        Given a valid query is provided
-        Then no error messages are returned 
+    Scenario: User submits a valid request
+        Given a valid request is provided
+        Then no error messages are returned
+
+Feature: Parsing and querying BigGIM inputs
+    Scenario: User submits an empty request
+        Given an empty request submitted
+        Then no error messages are returned
