@@ -154,12 +154,11 @@ class GoogleInterface:
                 return j
         return None
 
-    def get_query_job(self, request_id):
+    def get_query_job_results(self, request_id):
         ## See above for notes. This should be updated
-        for j in self.bq_client.list_jobs():
-            if j.name.find(request_id) > -1 and j.name.find('bq') > -1:
-                return j
-        return None
+        results = self.bq_client.get_query_results(request_id,
+            project=settings.BIGQUERY_PROJECT)
+        return results
 
     def get_job(self, job_id):
         for j in self.bq_client.list_jobs():

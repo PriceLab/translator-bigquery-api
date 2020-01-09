@@ -3,6 +3,9 @@ services:
   biggim:
       build: "."
       image: "pricelab/translator-bigquery-api"
+      environment:
+        PYTHONUNBUFFERED: 1
+        FLASK_SERVER_NAME: localhost
       ports:
         - "80:80"
         - "443:443"

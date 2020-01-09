@@ -18,12 +18,14 @@ from app.database import db
 # http://michal.karzynski.pl/blog/2016/06/19/building-beautiful-restful-apis-using-flask-swagger-ui-flask-restplus/
 
 
-app = Flask(__name__)
-app.logger.setLevel(logging.DEBUG)
-app.logger.info("Starting flask")
+app = Flask("TranslatorAPI")
+# Log initialization must happen after Flask initialization to print to stdout
+applogger = logging.getLogger("app")
+app.logger.addHandler(applogger)
 
 def configure_app(flask_app):
     flask_app.config['SERVER_NAME'] = settings.FLASK_SERVER_NAME
+    app.logger.info("Server is expecting hostname to be: {}".format(settings.FLASK_SERVER_NAME))
     flask_app.config['SQLALCHEMY_DATABASE_URI'] = settings.SQLALCHEMY_DATABASE_URI
     flask_app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = settings.SQLALCHEMY_TRACK_MODIFICATIONS
     flask_app.config['SWAGGER_UI_DOC_EXPANSION'] = settings.RESTPLUS_SWAGGER_UI_DOC_EXPANSION
@@ -50,7 +52,7 @@ def initialize_app(app):
     app.register_blueprint(blueprint)
     app.logger.info("Finished registering blueprint")
     db.init_app(app)
-    app.logger.info("finished initialize")
+    app.logger.info("Finished initialize")
 
 initialize_app(app)
 
@@ -58,6 +60,7 @@ initialize_app(app)
 def hello():
     app.logger.info("returning BigGIM API Link")
     return """<a href="http://biggim.ncats.io/api/">http://biggim.ncats.io/api/</a>"""
+
 
 if __name__ == '__main__':
     app.logger.info('>>>>> Starting development server at http://{}/api/ <<<<<'.format(app.config['SERVER_NAME']))
