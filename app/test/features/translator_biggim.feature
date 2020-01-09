@@ -1,11 +1,11 @@
 Feature: Parsing and checking input request
     Scenario: User submits an empty request
-	   Given an empty request submitted
-       Then no error messages are returned
+	   Given an empty biggim request submitted
+       Then no error messages are returned from biggim
 
     Scenario Outline: User submits request containing invalid parameters
-        Given a request with invalid "<argument type>" of "<argument>"
-        Then a list of errors is returned
+        Given a biggim request with invalid "<argument type>" of "<argument>"
+        Then a list of errors is returned from biggim
 
         Examples:
           | argument type           |   argument                |
@@ -20,10 +20,5 @@ Feature: Parsing and checking input request
           | average columns         |   None                    |
 
     Scenario: User submits a valid request
-        Given a valid request is provided
-        Then no error messages are returned
-
-Feature: Parsing and querying BigGIM inputs
-    Scenario: User submits an empty request
-        Given an empty request submitted
-        Then no error messages are returned
+        Given a valid biggim request is provided
+        Then no error messages are returned from biggim

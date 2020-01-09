@@ -45,3 +45,11 @@ def json_error_message(context):
     assert context.json_response['status'] == 'submitted'
     assert 'message' not in context.json_response
     assert context.json_response['request_id'] is not None
+
+@then('no error messages are returned')
+def step_get_no_error_message(context):
+    assert len(context.query.validate_query()) == 0
+
+@then('a list of errors is returned')
+def step_get_no_error_message(context):
+    assert len(context.query.validate_query()) != 0
