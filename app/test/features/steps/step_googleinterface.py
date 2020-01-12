@@ -3,22 +3,12 @@ from behave import given, when, then
 from mock import Mock, patch
 from google.cloud.bigquery.query import QueryResults
 from google.cloud.bigquery.client import Client
-
 from app.api.bigquery.querytools import GoogleInterface
 
 
 """
 This is a series of steps that mock the GoogleInterface class to return specific values
 """
-
-def successful_run_async_query(context):
-  """ For querytools.py:run_async_query """
-  mock_bq_client = Mock()
-  mock_bq_client.run_async_query.return_value = {
-    "status": "submitted",
-    "request_id": "77dae546-b1e4-433e-9b47-4de68fe35686"
-  }
-  context.bq_client = mock_bq_client
 
 @when('I receive a successful query job result')
 def successful_get_query_results(context):

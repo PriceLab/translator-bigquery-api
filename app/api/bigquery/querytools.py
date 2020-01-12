@@ -299,7 +299,8 @@ class QueryBuilder:
         # First check if table is valid. If not, other checks would fail
         it = self.invalid_table()
         if len(it) > 0:
-            return it
+            errors = self._preparsing_errors + it
+            return errors
 
         ic = self.invalid_columns()
         ig = self.invalid_genes()

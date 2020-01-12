@@ -213,6 +213,7 @@ def run_query(request):
 
     qb = QueryBuilder.from_request(request)
     errors = qb.validate_query()
+    print(errors)
     if len(errors):
         return {'status':'error',
                 'message': '\n'.join(errors)}

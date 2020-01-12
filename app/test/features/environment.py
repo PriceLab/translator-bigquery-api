@@ -32,3 +32,11 @@ def before_all(context):
         mock_obj.name = valid_attributes['columns'][counter]
         counter += 1
     context.mock_table_schema = mock_schema
+
+    # mock BigQuery query
+    mock_bq_client = Mock()
+    mock_bq_client.run_async_query.return_value = {
+    "status": "submitted",
+    "request_id": "77dae546-b1e4-433e-9b47-4de68fe35686"
+    }
+    context.bq_client = mock_bq_client
