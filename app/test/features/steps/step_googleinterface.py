@@ -234,7 +234,7 @@ def successful_get_list_jobs(context):
 
 def successful_storage_results(context):
   """ for use in querytools.py:list_blobs """
-
+  mock_bucket = Mock()
   mock_bucket.list_blobs.return_value = {
     u'items': [
       {
