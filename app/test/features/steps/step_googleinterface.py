@@ -10,6 +10,12 @@ from app.api.bigquery.querytools import GoogleInterface
 This is a series of steps that mock the GoogleInterface class to return specific values
 """
 
+def _make_credentials():
+    import google.auth.credentials
+
+    return Mock(spec=google.auth.credentials.Credentials)
+
+
 @when('I receive a successful query job result')
 def successful_get_query_results(context):
   """ For querytools.py:get_query_job_results """
@@ -60,8 +66,11 @@ def successful_get_list_jobs(context):
   print("RETURNING GET EXTRACT JOB")
   # Uses the current credentials to create a client that can parse the
   # saved response object into a Job.
-  gi = GoogleInterface()
-  job = gi.bq_client.job_from_resource({
+
+  creds =_make_credentials()
+  client = Client(credentials=creds, project="PROJECT")
+
+  job = client.job_from_resource({
     u'status': {u'state': u'DONE'},
     u'kind': u'bigquery#job',
     u'statistics':
@@ -234,7 +243,7 @@ def successful_get_list_jobs(context):
 
 def successful_storage_results(context):
   """ for use in querytools.py:list_blobs """
-
+  mock_bucket = Mock()
   mock_bucket.list_blobs.return_value = {
     u'items': [
       {
