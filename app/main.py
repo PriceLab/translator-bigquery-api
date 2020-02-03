@@ -1,5 +1,5 @@
 import logging.config
-logging.config.fileConfig('logging.conf')
+logging.config.fileConfig('/app/logging.conf')
 
 import sys
 sys.path.append('/')

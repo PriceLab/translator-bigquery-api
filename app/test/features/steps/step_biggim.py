@@ -15,7 +15,6 @@ def validate_uuid(id):
 
     return (str(uuid_obj) == id)
 
-
 @then('the query gets a request id')
 def step_get_request_id(context):
     with mock.patch('google.cloud.bigquery.Client') as mock_google:

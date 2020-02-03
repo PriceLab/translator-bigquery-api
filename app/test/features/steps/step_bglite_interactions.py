@@ -1,5 +1,5 @@
 import sys
-sys.path.append('../../')
+sys.path.append('/')
 
 from behave import given, when, then
 from mock import patch
