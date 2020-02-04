@@ -20,3 +20,19 @@ Feature: Job Status
         | "0a5c64ea-2832-494c-a91b-f1c6e5b565a4  |
         | test                                   |
         | 0a5c6555ea-2832-494c-a91b-f1c6e5b565a4 |
+
+    Scenario: User submits request that is a missing query job
+      Given a successful request id
+      Then the request status API returns a missing query job message
+
+    Scenario: User submits request that is still running
+      Given a successful request id
+      Then the request status API returns a query still running message
+
+      Scenario: User submits request that is a missing extraction job
+        Given a successful request id
+        Then the request status API returns a missing extraction job message
+
+      Scenario: User submits request that is still extracting
+        Given a successful request id
+        Then the request status API returns an extraction still running message

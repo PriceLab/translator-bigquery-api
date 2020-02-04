@@ -1,8 +1,11 @@
 import sys
-sys.path.append('../../')
+sys.path.append('/')
 
 from behave import given, when, then
 from mock import patch
+from google.cloud.bigquery.query import QueryResults
+from mock import *
+
 
 from app.api.bigquery.business_interactions import get_request_status
 
@@ -47,3 +50,51 @@ def request_status_invalid_request_id(context):
     print(result)
     assert result['status'] == 'error'
     assert result['message'] == 'Invalid request_id'
+
+@then('the request status API returns a missing query job message')
+def null_job_request_status(context):
+    with patch('app.api.bigquery.business_interactions.GoogleInterface') as mock_googleinterface:
+        mock_googleinterface().get_query_job_results.return_value = None
+
+        result = get_request_status(context.request_id)
+        print(result)
+        assert result['status'] == 'error'
+        assert result['message'] == 'No such request - Missing query job.'
+
+@then('the request status API returns a query still running message')
+def null_job_request_status(context):
+    googleinterface = context.googleinterface
+    with patch('app.api.bigquery.business_interactions.GoogleInterface') as mock_googleinterface:
+        mock_googleinterface().get_query_job_results = MagicMock()
+        mock_googleinterface().get_query_job_results().complete = False
+
+        result = get_request_status(context.request_id)
+        print(result)
+        assert result['status'] == 'running'
+        assert result['message'] == 'Query job is running.'
+
+@then('the request status API returns a missing extraction job message')
+def null_job_request_status(context):
+    googleinterface = context.googleinterface
+    with patch('app.api.bigquery.business_interactions.GoogleInterface') as mock_googleinterface:
+        mock_googleinterface().get_query_job_results = MagicMock()
+        mock_googleinterface().get_query_job_results().errors = None
+        mock_googleinterface().get_extract_job.return_value = None
+
+        result = get_request_status(context.request_id)
+        print(result)
+        assert result['status'] == 'error'
+        assert result['message'] == 'Extraction not found. Might retry.'
+
+@then('the request status API returns an extraction still running message')
+def null_job_request_status(context):
+    googleinterface = context.googleinterface
+    with patch('app.api.bigquery.business_interactions.GoogleInterface') as mock_googleinterface:
+        mock_googleinterface().get_query_job_results = MagicMock()
+        mock_googleinterface().get_query_job_results().errors = None
+        mock_googleinterface().get_extract_job.return_value = MagicMock()
+
+        result = get_request_status(context.request_id)
+        print(result)
+        assert result['status'] == 'running'
+        assert result['message'] == 'Extraction job is running.'

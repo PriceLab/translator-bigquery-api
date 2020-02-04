@@ -129,9 +129,6 @@ def get_request_status(request_id):
         errors = []
         try:
             val = uuid.UUID(request_id, version=4)
-            if val.hex == request_id:
-                errors.append("Invalid request_id")
-
         except ValueError:
             # If it's a value error, then the string
             # is not a valid hex code for a UUID.
