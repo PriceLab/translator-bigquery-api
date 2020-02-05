@@ -101,7 +101,7 @@ ndex_response = api.model('NDEx response', {
                 description="A list of NDEx uuids")
         })
 
-query_status = api.model('Query request', {
+query_status = api.model('Query request id', {
         'request_id': fields.String(
             pattern='[0-9a-f]{12}4[0-9a-f]{3}[89ab][0-9a-f]{15}\Z',
             description='The request id for this query as UUID',
@@ -233,4 +233,3 @@ bglite_query_request = api.model('lilGIM request',{
         default=1000
         ),
     })
-

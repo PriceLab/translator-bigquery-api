@@ -39,10 +39,7 @@ class NDExSubmit(Resource):
         code = 200 if response['status'] == 'complete' else 404
         return response, code
 
-@ns.doc(query_status)
-@lilgim.doc(query_status)
-@biggim.doc(query_status)
-@bigclam.doc(query_status)
+@ns.doc(params={'request_id': 'The request id for this query as UUID'})
 @ns.route('/status/<string:request_id>')
 @lilgim.route('/status/<string:request_id>')
 @biggim.route('/status/<string:request_id>')
@@ -63,4 +60,3 @@ class InteractionsStatus(Resource):
             return result, 404
         else:
             return result, 200
-
