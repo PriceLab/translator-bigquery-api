@@ -61,6 +61,7 @@ class BGLiteQueryBuilder(QueryBuilder):
     def invalid_restrictions(self):
         try:
             float(self._minR)
+            assert self._minR <= 1.0
         except ValueError:
             return ["%s is not a valid minimum r." % (self._minR)]
         return []
@@ -146,15 +147,6 @@ class BGLiteQueryBuilder(QueryBuilder):
         def parse_list(gstr):
             return map(lambda x: x.strip(), gstr.split(','))
 
-        def parse_restrictions(rstr):
-            rlist = parse_list(rstr)
-            if len(rlist) < 2 or len(rlist) % 2 != 0:
-                raise Exception("Bad restriction")
-            restrictions = []
-            for i in range(len(rlist)/2):
-                restrictions.append((rlist[2*i], rlist[2*i+1]))
-            return restrictions
-        error_messages = []
         rj = request
         args = {}
         if 'ids' in rj:
@@ -167,7 +159,6 @@ class BGLiteQueryBuilder(QueryBuilder):
             args['table'] = rj['table']
         if 'limit' in rj:
             args['limit'] = rj['limit']
-        if len(error_messages) > 0:
-            args['error_messages'] = error_messages
+
         glogger.debug("Args object.[%s]" % (str(args),))
         return cls(**args)
