@@ -1,5 +1,5 @@
 import sys
-sys.path.append('../../')
+sys.path.append('/')
 
 from behave import *
 from app.api.bigquery.bigclam import *
@@ -69,4 +69,3 @@ def step_invalid_query_type_base_query(context):
   qb = BCQueryBuilder(context.genes, context.query_type)
   # throws an exception caught by try to step
   result = qb.base_query
-

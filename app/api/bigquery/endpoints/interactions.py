@@ -1,10 +1,10 @@
-
 import logging
 
 from flask import request
 from flask_restplus import Resource
-from app.api.bigquery.business_interactions import get_request_status, ndex
+from app.api.bigquery.business_interactions import get_request_status
 from app.api.bigquery.serializers import query_status, query_status_response, ndex_request, ndex_response
+from app.api.bigquery.ndex_interactions import ndex
 
 from app.api.restplus import api
 from app.api.bigquery.endpoints.bglite import ns as lilgim
