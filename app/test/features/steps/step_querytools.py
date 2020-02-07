@@ -21,7 +21,9 @@ def step_submit_invalid_request(context, argument_type, argument):
                         'limits': ['limit'],
                         'table': ['table'],
                         'restriction boolean': ['restriction_bool'],
-                        'average columns': ['average_columns']
+                        'average columns': ['average_columns'],
+                        'restriction_gt': ['restriction_gt'],
+                        'restriction_lt': ['restriction_lt'],
                         }
     request = {}
 
@@ -32,7 +34,7 @@ def step_submit_invalid_request(context, argument_type, argument):
     context.request = request
     context.processed_request = QueryBuilder.from_request(request)
 
-@given('a valid biggim request is provided')
+@given('a valid biggim request with all parameters is provided')
 def step_submit_valid_request(context):
     # generate request
     valid_request = {'average_columns': False,
@@ -40,13 +42,59 @@ def step_submit_valid_request(context):
                     'ids1': '5111,6996,57697,6815,889,7112,2176,1019,5888,5706',
                     'ids2': '5111,6996,57697,6815,889,7112,2176,1019,5888,5706',
                     'limit': 40000,
-                    'restriction_bool': 'BioGRID_Interaction,True',
+                    'restriction_bool': 'BioGRID_Interaction,True,GTEx_Brain_Correlation,False',
                     'restriction_gt': 'TCGA_GBM_Correlation,.2, GTEx_Brain_Correlation,.2',
                     'restriction_join': 'intersect',
                     'restriction_lt': 'TCGA_GBM_Pvalue,1.3, GTEx_Brain_Pvalue,1.3',
                     'table': 'BigGIM_70_v1'}
     context.request = valid_request
     context.processed_request = QueryBuilder.from_request(valid_request)
+    context.query = context.processed_request.generate_query()
+
+@given('a valid biggim request with less parameters is provided')
+def step_submit_valid_request(context):
+    # generate request
+    valid_request_1 = {'average_columns': True,
+                    'columns': 'TCGA_GBM_Correlation,TCGA_GBM_Pvalue,GTEx_Brain_Correlation,GTEx_Brain_Pvalue',
+                    'ids1': '5111,6996,57697,6815,889,7112,2176,1019,5888,5706',
+                    'limit': 100,
+                    'restriction_join': 'union',
+                    'table': 'BigGIM_70_v1'}
+    valid_request_2 = {'average_columns': True,
+                    'columns': 'TCGA_GBM_Correlation,TCGA_GBM_Pvalue,GTEx_Brain_Correlation,GTEx_Brain_Pvalue',
+                    'ids2': '5111,6996,57697,6815,889,7112,2176,1019,5888,5706',
+                    'restriction_join': 'union',
+                    'restriction_gt': 'TCGA_GBM_Correlation,.2, GTEx_Brain_Correlation,.2',
+                    'limit': 100,
+                    'table': 'BigGIM_70_v1'}
+    context.request = valid_request_1
+    context.processed_request = QueryBuilder.from_request(valid_request_1)
+    context.query = context.processed_request.generate_query()
+
+    context.request_2 = valid_request_2
+    context.processed_request_2 = QueryBuilder.from_request(valid_request_2)
+    context.quer_2 = context.processed_request.generate_query()
+
+@given('a valid biggim request with no genes or columns is provided')
+def step_submit_valid_request(context):
+    # generate request
+    valid_request_1 = {'average_columns': True,
+                    'limit': 100,
+                    'restriction_join': 'union',
+                    'restriction_gt': 'TCGA_GBM_Correlation,.2, GTEx_Brain_Correlation,.2',
+                    'table': 'BigGIM_70_v1'}
+    valid_request_2 = {'average_columns': False,
+                    'restriction_join': 'intersect',
+                    'restriction_gt': 'TCGA_GBM_Correlation,.2, GTEx_Brain_Correlation,.2',
+                    'limit': 100,
+                    'table': 'BigGIM_70_v1'}
+    context.request = valid_request_1
+    context.processed_request = QueryBuilder.from_request(valid_request_1)
+    context.query = context.processed_request.generate_query()
+
+    context.request_2 = valid_request_2
+    context.processed_request_2 = QueryBuilder.from_request(valid_request_2)
+    context.quer_2 = context.processed_request.generate_query()
 
 
 @then('no error messages are returned from biggim')

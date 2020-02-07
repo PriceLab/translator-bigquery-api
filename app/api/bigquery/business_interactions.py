@@ -7,9 +7,9 @@ from app.api.bigquery.bglite import *
 
 from google.cloud import bigquery
 from google.cloud import storage
-import uuid, logging
+import uuid
+import logging
 import math
-import pandas
 
 glogger = logging.getLogger()
 KEY = settings.BIGQUERY_KEY

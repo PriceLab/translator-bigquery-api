@@ -1,5 +1,5 @@
 from app.api.bigquery.bigclam import *
-from app.api.bigquery.querytools import GoogleInterface
+from app.api.bigquery.googleinterface import GoogleInterface
 
 glogger = logging.getLogger()
 

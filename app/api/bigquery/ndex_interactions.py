@@ -1,5 +1,5 @@
-import uuid, logging
-import math, time
+import logging
+import time
 import ndex2
 import pandas
 from app.api.bigquery.business_interactions import get_request_status
@@ -8,8 +8,8 @@ glogger = logging.getLogger()
 
 def ndex(request):
     if 'request_id' not in request:
-        return {'status':'error',
-                'message':'request_id is required'}
+        return {'status': 'error',
+                'message': 'request_id is required'}
     else:
         request_id = request['request_id']
     if 'username' not in request or len(request['username'].strip()) == 0:
@@ -57,7 +57,7 @@ def push_to_ndex(biggim_id, username='biggim', password='ncats', server="http://
     try:
         my_ndex=ndex2.Ndex2(server, username, password)
         my_ndex.update_status()
-    except Exception as inst:
+    except Exception:
         glogger.exception("Could not access account %s with password %s" % (username, password))
         return {'status':'error', 'message':"Invalid authentication to NDEX"}
     user = my_ndex.get_user_by_username(username)

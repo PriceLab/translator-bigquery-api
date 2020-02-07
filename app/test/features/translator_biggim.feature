@@ -16,11 +16,21 @@ Feature: Submitting query to BigQuery
             | pvalue threshold        |   TCGA_GBM_Pvalue         |
             | join type               |   add                     |
             | limits                  |   -1000                   |
+            | limits                  |   Na                      |
             | table                   |   fake_table              |
-            | restriction boolean     |   BioGRID_Inter,None      |
+            | restriction boolean     |   BioGRID_Inter,Na        |
+            | restriction_lt          |   BioGRID_Inter,True      |
+            | restriction_lt          |   TEST_TEST,0.1           |
+            | restriction_gt          |   BioGRID_Inter,True      |
+            | restriction_gt          |   TEST_TEST,0.1           |
             | average columns         |   None                    |
 
-    Scenario: User submits a valid request
-        Given a valid biggim request is provided
+    Scenario: User submits a valid biggim request with all parameters is provided
+        Given a valid biggim request with all parameters is provided
+        Then the query gets a request id
+        And the resulting status message says submitted
+
+    Scenario: User submits a valid biggim request with less parameters
+        Given a valid biggim request with all parameters is provided
         Then the query gets a request id
         And the resulting status message says submitted
