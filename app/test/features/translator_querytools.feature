@@ -34,6 +34,6 @@ Feature: Parsing and checking input request
         Given a valid biggim request with less parameters is provided
         Then no error messages are returned from biggim
 
-    Scenario: User submits a valid request with less parameters
+    Scenario: User submits a valid request with no gene or columns
         Given a valid biggim request with no genes or columns is provided
         Then no error messages are returned from biggim
