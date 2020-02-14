@@ -86,7 +86,7 @@ class MetadataStudy(Resource):
 
 @ns.route('/tissue')
 class Tissue(Resource):
-    @ns.marshal_with(unique_tissue_list) 
+    @ns.marshal_with(unique_tissue_list)
     def get(self):
         """Return a list of available tissues"""
         tis = db.session.query(SubstudyTissue.tissue).distinct().all()
@@ -126,16 +126,16 @@ class OpenAPISpec(Resource):
         swagger_path = "http://%s/api/metadata/%s" % (settings.FLASK_SERVER_NAME, 'swagger')
         converter_path = "https://openapi-converter.herokuapp.com/api/v1/convert"
         headers = {'accept':'application/json'}
-        full_path = "%s?%s" % (converter_path, 
+        full_path = "%s?%s" % (converter_path,
                                urllib.urlencode({'url':swagger_path}))
         req = requests.get(full_path, headers=headers)
         req.raise_for_status()
         result = req.json()
         # smartapi stuff
-        result['tags'] = [{'name':'translator'},{'name':'ISB'}, {'name':'gene'}, 
-                          {'name':'similarity'},{'name':'tissue'}, {'name':'TCGA'}, 
-                          {'name':'GIANT'}, {'name':'BioGrid'}, {'name':'GTEx'}, 
-                          {'name':'BigQuery'}, {'name':'network'}, {'name': 'DeepTranslate'}, 
+        result['tags'] = [{'name':'translator'},{'name':'ISB'}, {'name':'gene'},
+                          {'name':'similarity'},{'name':'tissue'}, {'name':'TCGA'},
+                          {'name':'GIANT'}, {'name':'BioGrid'}, {'name':'GTEx'},
+                          {'name':'BigQuery'}, {'name':'network'}, {'name': 'DeepTranslate'},
                           {'name':'query'} ]
         result['info']['contact'] = {'name': 'John C. Earls', 'email':'john.c.earls@gmail.com'}
         servers = [{'url':"http://%s/api" % (settings.FLASK_SERVER_NAME,)}]

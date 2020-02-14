@@ -102,6 +102,7 @@ def add_studies_substudies():
                     log.debug("Creating Substudy [%s.%s]" % (s,'Default' ))
                     add_substudy(st.id, 'Default', 'Default', 
                         None, None)
+
 def get_metadata_tissues():
     query = """Select *
            FROM [%s:%s.%s]
