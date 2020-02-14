@@ -1,6 +1,6 @@
 Feature: BGLite Business
 
-    Scenario Outline: User runs an invalid run_bglite_gt2g_query
+    Scenario Outline: User runs an invalid run_bglite_gt2g_query with specific invalid arguments
         Given a configured sqlalchemy engine
         When a bglite run_bglite_gt2g_query with invalid "<argument type>" of "<argument>"
         Then a json error message is returned
