@@ -1,6 +1,10 @@
+import os
+
 # Flask settings
 
-FLASK_SERVER_NAME = 'isbtranslatorapi.adversary.us'#'biggim.ncats.io'
+# Get the domain name for the server from the environment (passed from docker-compose.yml)
+# or default to the development server URL (0.0.0.0:8080)
+FLASK_SERVER_NAME = os.environ.get('FLASK_SERVER_NAME','0.0.0.0:8080')
 FLASK_DEBUG = True  # Do not use debug mode in production
 
 # Flask-Restplus settings
@@ -15,7 +19,7 @@ SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 #Bigquery settings
 
-BIGQUERY_KEY = '/cred/miRNA project-01ca75e6de66.json'
+BIGQUERY_KEY = '/cred/isb-cgc-04-0010-075a4babec5d.json'
 BIGQUERY_DATABASE_PASSWORD = '/cred/database_reset.json'
 BIGQUERY_BUCKET = 'ncats_bigquery_results'
 BIGQUERY_PROJECT = 'isb-cgc-04-0010'

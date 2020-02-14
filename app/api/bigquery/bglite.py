@@ -5,6 +5,13 @@ import logging
 
 glogger = logging.getLogger()
 
+"""
+BGLite = LittleGIM
+LittleGIM specifies a set of defaults
+LittleGIM simplifies the set of returns by averaging across the columns that are the same across multiple datasets
+Returns min, max, and average from the columns by tissue type
+"""
+
 class BGLiteQueryBuilder(QueryBuilder):
     def __init__(self, table=settings.BIGQUERY_DEFAULT_TABLE,
             genes=[], tissue = 'whole_body', minR = 0.3, limit=10000,
@@ -26,7 +33,7 @@ class BGLiteQueryBuilder(QueryBuilder):
         ii = self.invalid_tissue()
         ig = self.invalid_genes()
         errors = self._preparsing_errors + it + ir + ig + il + ii
-        return errors 
+        return errors
 
     def invalid_genes(self):
         bad_genes = []
@@ -44,6 +51,7 @@ class BGLiteQueryBuilder(QueryBuilder):
 
     def invalid_tissue(self):
         self._columns = self.get_columns()
+        print(self._columns)
         if len(self._columns) == 0:
             glogger.debug("bad tissue %s" % (self._tissue))
             return ["%s is not a valid a tissue." % (self._tissue,)]
@@ -53,6 +61,7 @@ class BGLiteQueryBuilder(QueryBuilder):
     def invalid_restrictions(self):
         try:
             float(self._minR)
+            assert self._minR <= 1.0
         except ValueError:
             return ["%s is not a valid minimum r." % (self._minR)]
         return []
@@ -98,27 +107,27 @@ class BGLiteQueryBuilder(QueryBuilder):
         ## tissues of interest, while also thresholding on the correlation
         ## value
         t1 = """
-        SELECT GPID, Gene1, Gene2, GREATEST(%s) AS maxCorr, 
-            LEAST(%s) AS minCorr, 
-            %s as aveCorr 
-            
-        FROM `%s` 
-        WHERE (%s) 
+        SELECT GPID, Gene1, Gene2, GREATEST(%s) AS maxCorr,
+            LEAST(%s) AS minCorr,
+            %s as aveCorr
+
+        FROM `%s`
+        WHERE (%s)
         """ % (clist, clist, ave, ptable, gsel)
 
         j1 = """
         SELECT Gene1, b.Approved_Symbol AS Symbol1, Gene2, maxCorr, minCorr, aveCorr
-        FROM t1 a JOIN `isb-cgc.genome_reference.genenames_mapping` b 
+        FROM t1 a JOIN `isb-cgc.genome_reference.genenames_mapping` b
             ON a.Gene1=CAST(b.Entrez_Gene_ID AS INT64)"""# % (clist,)
 
         j2 = """
         SELECT Gene1, Symbol1, Gene2, b.Approved_Symbol AS Symbol2, maxCorr, minCorr, aveCorr
-        FROM j1 a JOIN `isb-cgc.genome_reference.genenames_mapping` b 
-            ON a.Gene2=CAST(b.Entrez_Gene_ID AS INT64)  
+        FROM j1 a JOIN `isb-cgc.genome_reference.genenames_mapping` b
+            ON a.Gene2=CAST(b.Entrez_Gene_ID AS INT64)
         """# % (clist,)
 
         q  = """
-        WITH 
+        WITH
         t1 AS (%s),
         j1 AS (%s),
         j2 AS (%s)
@@ -138,15 +147,6 @@ class BGLiteQueryBuilder(QueryBuilder):
         def parse_list(gstr):
             return map(lambda x: x.strip(), gstr.split(','))
 
-        def parse_restrictions(rstr):
-            rlist = parse_list(rstr)
-            if len(rlist) < 2 or len(rlist) % 2 != 0:
-                raise Exception("Bad restriction")
-            restrictions = []
-            for i in range(len(rlist)/2):
-                restrictions.append((rlist[2*i], rlist[2*i+1]))
-            return restrictions
-        error_messages = []
         rj = request
         args = {}
         if 'ids' in rj:
@@ -159,7 +159,6 @@ class BGLiteQueryBuilder(QueryBuilder):
             args['table'] = rj['table']
         if 'limit' in rj:
             args['limit'] = rj['limit']
-        if len(error_messages) > 0:
-            args['error_messages'] = error_messages
+
         glogger.debug("Args object.[%s]" % (str(args),))
         return cls(**args)

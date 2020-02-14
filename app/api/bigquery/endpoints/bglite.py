@@ -7,10 +7,10 @@ from app.api.bigquery.serializers import bglite_query_request, query_status_resp
 from app.api.bigquery.parsers import bglite_query_url_parser
 
 from app.api.restplus import api
-from app.database.models import TestModel 
+from app.database.models import TestModel
 from app import settings
 
-ns = api.namespace('lilgim', 
+ns = api.namespace('lilgim',
         description="""Simplified interface to BigGIM""")
 log = logging.getLogger(__name__)
 
@@ -45,4 +45,3 @@ class BGLiteQuery(Resource):
         else:
             log.debug("Valid request %s" % (results))
             return results, 200
-

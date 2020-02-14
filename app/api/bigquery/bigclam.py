@@ -23,7 +23,7 @@ class BCQueryBuilder:
         iq = self.invalid_query_type()
         ig = self.invalid_genes()
         il = self.invalid_limit()
-        errors = self._preparsing_errors + ig + il
+        errors = self._preparsing_errors + iq + ig + il
         return errors
 
     def invalid_limit(self):
@@ -35,7 +35,10 @@ class BCQueryBuilder:
 
     def invalid_genes(self):
         bad_genes = []
-        #TODO: check genes
+        # CLAM uses Entrez Gene Symbols, so all digits is not valid
+        for gene in self._genes:
+          if gene.isdigit():
+            bad_genes.append(gene)
         if len(bad_genes):
             return ["Bad gene: %s" % (g) for g in bad_genes]
         else:
@@ -81,6 +84,7 @@ class BCQueryBuilder:
 
     @property
     def genes_subquery(self):
+        """ Not Used """
         return ' UNION ALL '.join(["SELECT '%s'" % (g,) for g in self.genes])
 
     @property
@@ -90,7 +94,7 @@ class BCQueryBuilder:
         elif self._query_type=='g2g':
             return self.gene2gene()
         else:
-            raise Exception("[%s] is unknown query type")
+            raise Exception("{} is unknown query type".format(self._query_type))
 
     def gene2gene(self):
         return """
@@ -239,7 +243,15 @@ LIMIT %i """
 
 
     def gene2drug(self):
-        return """
+      """
+      Connects Gene Symbols
+        - To Cell lines via Copy Number Variations
+        - To Cell lines via WES Gene variations
+      Then connects Cell lines to Drug response information
+      Returns a rank of drugs where the drug has the lowest
+      IC50 value in that particular cell-line
+      """
+      return """
 WITH
   --
   -- we query the Copy_Number data in two steps:
