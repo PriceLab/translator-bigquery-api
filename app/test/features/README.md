@@ -30,14 +30,14 @@
 - User submits an invalid query type to base_query
 
 ## translator_bigclam_bi.feature
-### Tests lower level functions related to BigCLAM
+### Tests lower level functions related to BigCLAM. Scenarios include:
 - User runs an invalid run_bigclam_g2g_query
 - User submits a valid run_bigclam_g2g_query
 - User runs an invalid run_bigclam_g2d_query
 - User submits a valid run_bigclam_g2d_query
 
 ## translator_business_interactions.feature
-### Tests interactions with BigQuery, including retreaving request IDs and job status
+### Tests interactions with BigQuery, including retreaving request IDs and job status. Scenarios include:
 - Successfully retrieves a request by id
 - User submits request status query containing invalid parameters
 - User submits request that is a missing query job
