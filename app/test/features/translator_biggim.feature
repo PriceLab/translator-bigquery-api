@@ -31,6 +31,6 @@ Feature: Submitting query to BigQuery
         And the resulting status message says submitted
 
     Scenario: User submits a valid biggim request with less parameters
-        Given a valid biggim request with all parameters is provided
+        Given a valid biggim request with less parameters is provided
         Then the query gets a request id
         And the resulting status message says submitted
