@@ -4,8 +4,11 @@ import os
 
 # Get the domain name for the server from the environment (passed from docker-compose.yml)
 # or default to the development server URL (0.0.0.0:8080)
-FLASK_SERVER_NAME = os.environ.get('FLASK_SERVER_NAME','0.0.0.0:8080')
-FLASK_DEBUG = True  # Do not use debug mode in production
+FLASK_SERVER_NAME = os.environ.get('FLASK_SERVER_NAME','biggim.ncats.io')
+if FLASK_SERVER_NAME == 'biggim.ncats.io':
+    FLASK_DEBUG = False
+else:
+    FLASK_DEBUG = True  # Do not use debug mode in production
 
 # Flask-Restplus settings
 RESTPLUS_SWAGGER_UI_DOC_EXPANSION = 'list'
