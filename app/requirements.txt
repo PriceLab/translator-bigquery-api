@@ -43,5 +43,5 @@ SQLAlchemy==1.1.14
 urllib3==1.22
 uWSGI==2.0.15
 virtualenv==15.1.0
-Werkzeug==0.12.2
+Werkzeug==0.15.3
 behave==1.2.6
