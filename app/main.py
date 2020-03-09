@@ -8,9 +8,10 @@ from flask import Flask, Blueprint
 from app import settings
 from app.api.bigquery.endpoints.biggim import ns as biggim
 from app.api.bigquery.endpoints.bigclam import ns as bigclam
-from app.api.bigquery.endpoints.bglite import ns as bglite 
+from app.api.bigquery.endpoints.bglite import ns as bglite
 from app.api.bigquery.endpoints.interactions import ns as interactions
 from app.api.bigquery.endpoints.metadata import ns as metadata
+from app.api.bigquery.endpoints.translator import ns as translator
 from app.api.restplus import api
 from app.database import db
 
@@ -48,6 +49,7 @@ def initialize_app(app):
     api.add_namespace(bigclam)
     api.add_namespace(interactions)
     api.add_namespace(metadata)
+    api.add_namespace(translator)
     app.logger.info("Finished adding namespaces")
     app.register_blueprint(blueprint)
     app.logger.info("Finished registering blueprint")

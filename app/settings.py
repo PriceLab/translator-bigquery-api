@@ -22,11 +22,11 @@ SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 #Bigquery settings
 
-BIGQUERY_KEY = '/cred/isb-cgc-04-0010-075a4babec5d.json'
+BIGQUERY_KEY = '/cred/translatordevkps-c07f79a36ebb.json'
 BIGQUERY_DATABASE_PASSWORD = '/cred/database_reset.json'
-BIGQUERY_BUCKET = 'ncats_bigquery_results'
-BIGQUERY_PROJECT = 'isb-cgc-04-0010'
-BIGQUERY_DATASET = 'NTTB_BigGIM'
+BIGQUERY_BUCKET = 'ncats_biggim_bigclam_output'
+BIGQUERY_PROJECT = 'translatordevkps'
+BIGQUERY_DATASET = 'BigGIM'
 BIGQUERY_DEFAULT_TABLE = 'BigGIM_70_v1'
 BIGQUERY_METADATA_DIRECTORY = '/cred/metadata'
 BIGQUERY_METADATA_COLUMNS = 'metadata_columns'

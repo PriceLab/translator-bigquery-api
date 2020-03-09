@@ -233,3 +233,153 @@ bglite_query_request = api.model('lilGIM request',{
         default=1000
         ),
     })
+
+# TRANSLATOR COMMON
+# Built using https://github.com/NCATS-Tangerine/translator-testing-framework/blob/master/features/microservices.feature
+translator_edge = api.model('Translator Edge', {
+    'id': fields.String(required=True,
+        example="e00",
+        description="Edge ID"
+    ),
+    'source_id': fields.String(required=True,
+        example="ncbigene:354",
+        description="Source of Edge",
+    ),
+    'target_id': fields.String(required=True,
+        example="ncbigene:3486",
+        description="Target of Edge"
+    )
+})
+
+
+translator_options = api.model('Translator Query Options',{
+    'columns':fields.String(description="""A comma delimited list of column names to return.\n
+Gene ids are always returned and do not need to be specified. If a column is not present, then an error is returned.\n
+Available columns are provided by `/api/metadata/tables/{table_name}/columns`.\n
+**Default**: all columns.
+""",
+        required=False,
+        example = 'TCGA_GBM_Correlation,TCGA_GBM_Pvalue,GTEx_Brain_Correlation,GTEx_Brain_Pvalue'
+    ),
+    'restriction_lt': fields.String(description="""
+A list of pairs of values `column name,value` with which to restrict the results of the query to rows where the value
+of the column is less than the given value.
+""",
+        example='TCGA_GBM_Pvalue,1.3, GTEx_Brain_Pvalue,1.3'
+    ),
+    'restriction_gt': fields.String(description="""
+A list of pairs of values `column name,value` with which to restrict the results of the query to rows where the value
+of the column is greater than the given value.
+""",
+        required=False,
+        example='TCGA_GBM_Correlation,.2, GTEx_Brain_Correlation,.2'
+    ),
+    'restriction_bool': fields.String(description="""
+A list of pairs of values `column name,value` with which to restrict the results of the query to rows where the value
+of the column is True or False.
+""",
+        required=False,
+        example='BioGRID_Interaction,True'
+    ),
+    'restriction_join': fields.String(description="The type of join made on restrictions.\n**Default**: intersect",
+        required=False,
+        example='intersect',
+        enum=['intersect','union']
+    ),
+    'average_columns': fields.Boolean(description="Return average over all columns as `mean`.",
+            required=False,
+            example=False,
+            default=False
+    ),
+    'limit': fields.Integer(description="The maximum number of rows to return.\n**Default**: 10000",
+        required=False,
+        example=10000
+    ),
+    'table':fields.String(description="""The table to select from.\n
+Available tables are provided by  `/api/metadata/tables`.\n
+**Default**: %s
+""" % settings.BIGQUERY_DEFAULT_TABLE,
+        example=settings.BIGQUERY_DEFAULT_TABLE
+    )
+})
+
+# TRANSLATOR QUERY GRAPH
+translator_query_node = api.model('Translator Query Node', {
+    'id': fields.String(required=True,
+        example="n01",
+        description="Node ID"
+    ),
+    'type': fields.String(required=True,
+        example="gene",
+        description="Node Type"
+    ),
+    'curie': fields.String(required=True,
+        example="ncbigene:354",
+        description="Node CURIE"
+    )
+})
+
+translator_query_graph = api.model('Translator Query Graph', {
+    'nodes': fields.List(fields.Nested(translator_query_node)),
+    'edges': fields.List(fields.Nested(translator_edge)),
+})
+
+translator_query = api.model('NCATS Translator Query', {
+    'message': fields.Nested(translator_query_graph),
+    'query_options': fields.Nested(translator_options)
+})
+
+# TRANSLATOR KNOWLEDGE GRAPH
+translator_knowledge_node = api.model('Translator Knowledge Node', {
+    'id': fields.String(required=True,
+        example="ncbigene:354",
+        description="Node ID"
+    ),
+    'type': fields.String(required=True,
+        example="gene",
+        description="Node Type"
+    ),
+    'name': fields.String(required=True,
+        example="KLK3",
+        description="Node Name"
+    )
+})
+
+translator_knowledge_graph = api.model('Translator Knowledge Graph', {
+    'nodes': fields.List(fields.Nested(translator_knowledge_node)),
+    'edges': fields.List(fields.Nested(translator_edge)),
+})
+
+translator_knowledge = api.model('NCATS Translator Knowledge Graph', {
+    'message': fields.Nested(translator_knowledge_graph),
+    'query_options': fields.Nested(translator_options)
+})
+
+# TRANSLATOR RESULT
+
+translator_node_binding = api.model('Translator Node Binding', {
+    'qg_id': fields.String(required=True,
+        example="n01",
+        description="Query Graph Node ID"
+    ),
+    'kg_id': fields.String(required=True,
+        example="ncbigene:354",
+        description="Knowledge Graph Node ID"
+    )
+})
+
+translator_edge_binding = api.model('Translator Edge Binding', {
+    'qg_id': fields.String(required=True,
+        example="e01",
+        description="Query Graph Edge ID"
+    ),
+    'kg_id': fields.String(required=True,
+        example="ncbigene:354",
+        description="Knowledge Graph Edge ID"
+    )
+})
+
+translator_result = api.model('Translator Result', {
+    'node_bindings': fields.List(fields.Nested(translator_node_binding)),
+    'edge_bindings': fields.List(fields.Nested(translator_edge_binding))
+})
