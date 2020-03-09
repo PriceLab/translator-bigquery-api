@@ -14,7 +14,6 @@ log = logging.getLogger(__name__)
 
 ns = api.namespace('translator',
         description="""Query BigGIM following the NCATS Translator Reasoner Standard API.""")
-
 @ns.route('/query_graph')
 class TranslatorQuery(Resource):
     @ns.response(400, "Bad query request.")
