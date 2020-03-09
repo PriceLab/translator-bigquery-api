@@ -11,6 +11,7 @@ from app.api.bigquery.endpoints.bglite import ns as lilgim
 
 from app.api.bigquery.endpoints.biggim import ns as biggim
 from app.api.bigquery.endpoints.bigclam import ns as bigclam
+from app.api.bigquery.endpoints.translator import ns as translator
 log = logging.getLogger(__name__)
 
 ns = api.namespace('results',
@@ -44,14 +45,17 @@ class NDExSubmit(Resource):
 @lilgim.route('/status/<string:request_id>')
 @biggim.route('/status/<string:request_id>')
 @bigclam.route('/status/<string:request_id>')
+@translator.route('/status/<string:request_id>')
 class InteractionsStatus(Resource):
-    @ns.doc( model=query_status_response,
+    @ns.doc(model=query_status_response,
             responses={'200':'OK', '404': 'Request id not found'})
-    @lilgim.doc( model=query_status_response,
+    @lilgim.doc(model=query_status_response,
             responses={'200':'OK', '404': 'Request id not found'})
-    @biggim.doc( model=query_status_response,
+    @biggim.doc(model=query_status_response,
             responses={'200':'OK', '404': 'Request id not found'})
-    @bigclam.doc( model=query_status_response,
+    @bigclam.doc(model=query_status_response,
+            responses={'200':'OK', '404': 'Request id not found'})
+    @translator.doc(model=query_status_response,
             responses={'200':'OK', '404': 'Request id not found'})
     def get(self, request_id):
         """Gets the status of a query request"""
