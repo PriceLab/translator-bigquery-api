@@ -324,10 +324,6 @@ translator_query_graph = api.model('Translator Query Graph', {
     'edges': fields.List(fields.Nested(translator_edge)),
 })
 
-translator_query = api.model('NCATS Translator Query', {
-    'message': fields.Nested(translator_query_graph),
-    'query_options': fields.Nested(translator_options)
-})
 
 # TRANSLATOR KNOWLEDGE GRAPH
 translator_knowledge_node = api.model('Translator Knowledge Node', {
@@ -350,13 +346,8 @@ translator_knowledge_graph = api.model('Translator Knowledge Graph', {
     'edges': fields.List(fields.Nested(translator_edge)),
 })
 
-translator_knowledge = api.model('NCATS Translator Knowledge Graph', {
-    'message': fields.Nested(translator_knowledge_graph),
-    'query_options': fields.Nested(translator_options)
-})
 
 # TRANSLATOR RESULT
-
 translator_node_binding = api.model('Translator Node Binding', {
     'qg_id': fields.String(required=True,
         example="n01",
@@ -382,4 +373,15 @@ translator_edge_binding = api.model('Translator Edge Binding', {
 translator_result = api.model('Translator Result', {
     'node_bindings': fields.List(fields.Nested(translator_node_binding)),
     'edge_bindings': fields.List(fields.Nested(translator_edge_binding))
+})
+
+translator_fields = api.model('Translator Fields', {
+    'query_graph': fields.Nested(translator_query_graph),
+    'knowledge_graph': fields.Nested(translator_knowledge_graph),
+    'results': fields.Nested(translator_result)
+})
+
+# TRANSLATOR MESSAGE
+translator = api.model('NCATS Translator', {
+    'message': fields.Nested(translator_fields)
 })
