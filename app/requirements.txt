@@ -21,7 +21,7 @@ googleapis-common-protos==1.5.3
 idna==2.6
 ijson==2.3
 itsdangerous==0.24
-Jinja2==2.9.6
+Jinja2==2.11.3
 jsonschema==2.6.0
 Markdown==2.6.9
 MarkupSafe==1.0
