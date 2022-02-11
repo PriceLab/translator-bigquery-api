@@ -29,7 +29,7 @@ ndex2==1.2.0.41
 networkx==1.11
 numpy==1.13.3
 pandas==0.20.3
-protobuf==3.4.0
+protobuf==3.15.0
 pyasn1==0.3.7
 pyasn1-modules==0.1.4
 pysolr==3.7.0
