@@ -27,7 +27,7 @@ Markdown==2.6.9
 MarkupSafe==1.0
 ndex2==1.2.0.41
 networkx==1.11
-numpy==1.13.3
+numpy==1.22.0
 pandas==0.20.3
 protobuf==3.4.0
 pyasn1==0.3.7
